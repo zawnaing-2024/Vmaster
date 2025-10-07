@@ -86,6 +86,17 @@ if (isset($_GET['delete'])) {
                 }
             }
             
+            // Delete from RADIUS if SSTP or V2Ray with RADIUS credentials
+            if (($account['server_type'] === 'sstp' || $account['server_type'] === 'v2ray') && 
+                !empty($account['account_username'])) {
+                if (defined('RADIUS_ENABLED') && RADIUS_ENABLED === true) {
+                    require_once __DIR__ . '/../includes/radius_handler.php';
+                    $radiusHandler = new RadiusHandler();
+                    $radiusHandler->deleteUser($account['account_username']);
+                    error_log("Deleted RADIUS user: " . $account['account_username']);
+                }
+            }
+            
             // If credential was from pool, mark as available again
             if ($account['pool_credential_id']) {
                 $stmt = $conn->prepare("UPDATE vpn_credentials_pool 

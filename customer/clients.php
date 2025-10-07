@@ -208,7 +208,7 @@ if (isset($_GET['delete'])) {
     $clientId = intval($_GET['delete']);
     try {
         // Get all VPN accounts for this client
-        $stmt = $conn->prepare("SELECT va.id, va.pool_credential_id, va.server_id, vs.server_type, vs.api_url, va.config_data 
+        $stmt = $conn->prepare("SELECT va.id, va.account_username, va.pool_credential_id, va.server_id, vs.server_type, vs.api_url, va.config_data 
             FROM vpn_accounts va 
             JOIN vpn_servers vs ON va.server_id = vs.id 
             WHERE va.staff_id = ?");
@@ -224,6 +224,17 @@ if (isset($_GET['delete'])) {
                     $vpnHandler->deleteOutlineAccessKey([
                         'api_url' => $account['api_url']
                     ], $configData['id']);
+                }
+            }
+            
+            // Delete from RADIUS if SSTP or V2Ray with RADIUS credentials
+            if (($account['server_type'] === 'sstp' || $account['server_type'] === 'v2ray') && 
+                !empty($account['account_username'])) {
+                if (defined('RADIUS_ENABLED') && RADIUS_ENABLED === true) {
+                    require_once __DIR__ . '/../includes/radius_handler.php';
+                    $radiusHandler = new RadiusHandler();
+                    $radiusHandler->deleteUser($account['account_username']);
+                    error_log("Deleted RADIUS user on client delete: " . $account['account_username']);
                 }
             }
             

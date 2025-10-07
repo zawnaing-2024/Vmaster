@@ -1,0 +1,147 @@
+═══════════════════════════════════════════════════════════════
+🔧 QUICK FIX FOR SSTP NOT WORKING ON PRODUCTION
+═══════════════════════════════════════════════════════════════
+
+PROBLEM: SSTP accounts created but no username/password shown
+REASON: RADIUS not set up + Pool is empty
+
+═══════════════════════════════════════════════════════════════
+✅ SOLUTION - Copy all commands below to your Ubuntu server:
+═══════════════════════════════════════════════════════════════
+
+# 1. Check current RADIUS setting
+docker exec vmaster_web php -r "require '/var/www/html/config/radius.php'; echo 'RADIUS_ENABLED: ' . (RADIUS_ENABLED ? 'TRUE' : 'FALSE') . PHP_EOL;"
+
+# 2. Check if pool table exists and credentials count
+docker exec vmaster_db mysql -uroot -prootpassword vpn_cms_portal -e "SELECT COUNT(*) as total FROM vpn_credentials_pool WHERE vpn_type='sstp' AND is_assigned=0"
+
+# 3. Check if RADIUS DB is running
+docker ps | grep radius
+
+═══════════════════════════════════════════════════════════════
+📝 Based on the output above, choose ONE of these fixes:
+═══════════════════════════════════════════════════════════════
+
+╔═══════════════════════════════════════════════════════════════╗
+║  FIX A: DISABLE RADIUS & USE POOL (QUICKEST - 2 MINUTES)     ║
+╚═══════════════════════════════════════════════════════════════╝
+
+# Step 1: Disable RADIUS
+docker exec vmaster_web sed -i "s/define('RADIUS_ENABLED', true);/define('RADIUS_ENABLED', false);/" /var/www/html/config/radius.php
+
+# Step 2: Verify it's disabled
+docker exec vmaster_web php -r "require '/var/www/html/config/radius.php'; echo 'RADIUS_ENABLED: ' . (RADIUS_ENABLED ? 'TRUE' : 'FALSE') . PHP_EOL;"
+
+# Step 3: Add 20 SSTP credentials to pool
+docker exec vmaster_db mysql -uroot -prootpassword vpn_cms_portal << 'EOF'
+INSERT INTO vpn_credentials_pool (vpn_type, username, password) VALUES 
+('sstp', 'sstp_user001', 'SecurePass001!@#'),
+('sstp', 'sstp_user002', 'SecurePass002!@#'),
+('sstp', 'sstp_user003', 'SecurePass003!@#'),
+('sstp', 'sstp_user004', 'SecurePass004!@#'),
+('sstp', 'sstp_user005', 'SecurePass005!@#'),
+('sstp', 'sstp_user006', 'SecurePass006!@#'),
+('sstp', 'sstp_user007', 'SecurePass007!@#'),
+('sstp', 'sstp_user008', 'SecurePass008!@#'),
+('sstp', 'sstp_user009', 'SecurePass009!@#'),
+('sstp', 'sstp_user010', 'SecurePass010!@#'),
+('sstp', 'sstp_user011', 'SecurePass011!@#'),
+('sstp', 'sstp_user012', 'SecurePass012!@#'),
+('sstp', 'sstp_user013', 'SecurePass013!@#'),
+('sstp', 'sstp_user014', 'SecurePass014!@#'),
+('sstp', 'sstp_user015', 'SecurePass015!@#'),
+('sstp', 'sstp_user016', 'SecurePass016!@#'),
+('sstp', 'sstp_user017', 'SecurePass017!@#'),
+('sstp', 'sstp_user018', 'SecurePass018!@#'),
+('sstp', 'sstp_user019', 'SecurePass019!@#'),
+('sstp', 'sstp_user020', 'SecurePass020!@#');
+EOF
+
+# Step 4: Verify credentials added
+docker exec vmaster_db mysql -uroot -prootpassword vpn_cms_portal -e "SELECT COUNT(*) as available_sstp_credentials FROM vpn_credentials_pool WHERE vpn_type='sstp' AND is_assigned=0"
+
+# Step 5: Restart web container
+docker restart vmaster_web
+
+# Step 6: Done!
+echo "✅ SSTP should work now! Test by creating an SSTP account."
+
+
+╔═══════════════════════════════════════════════════════════════╗
+║  FIX B: KEEP RADIUS ENABLED & ADD RADIUS DB (BETTER)         ║
+╚═══════════════════════════════════════════════════════════════╝
+
+# Step 1: Check if RADIUS DB is running
+docker ps -a | grep radius
+
+# If you see vmaster_radius_db:
+docker start vmaster_radius_db
+
+# If you DON'T see vmaster_radius_db at all:
+echo "RADIUS DB not in docker-compose.prod.yml"
+echo "You need to add it to docker-compose.prod.yml"
+echo "See SSTP_NOT_WORKING_FIX.md for instructions"
+
+# Step 2: Import RADIUS schema (if container exists)
+docker exec -i vmaster_radius_db mysql -uradius -pradiuspass radius < /var/www/vmaster/radius/schema.sql 2>&1 | grep -v "Warning"
+
+# Step 3: Test RADIUS connection
+docker exec vmaster_web php -r "require '/var/www/html/config/radius.php'; \$conn = getRadiusConnection(); echo \$conn ? '✅ RADIUS Connected' : '❌ RADIUS Failed'; echo PHP_EOL;"
+
+# Step 4: Restart web
+docker restart vmaster_web
+
+# Step 5: Test by creating SSTP account
+
+
+═══════════════════════════════════════════════════════════════
+🎯 RECOMMENDED: Use FIX A (it's faster and works immediately)
+═══════════════════════════════════════════════════════════════
+
+After running FIX A:
+1. Login as customer
+2. Go to VPN Accounts
+3. Create SSTP account
+4. You should see username: sstp_user001 and password!
+
+═══════════════════════════════════════════════════════════════
+❓ TROUBLESHOOTING
+═══════════════════════════════════════════════════════════════
+
+If still not working after FIX A:
+
+# Check if credentials are in the pool
+docker exec vmaster_db mysql -uroot -prootpassword vpn_cms_portal -e "SELECT id, vpn_type, username, is_assigned FROM vpn_credentials_pool WHERE vpn_type='sstp' LIMIT 5"
+
+# Check SSTP server exists and is active
+docker exec vmaster_db mysql -uroot -prootpassword vpn_cms_portal -e "SELECT id, server_name, server_type, status FROM vpn_servers WHERE server_type='sstp'"
+
+# Check recent VPN accounts
+docker exec vmaster_db mysql -uroot -prootpassword vpn_cms_portal -e "SELECT id, account_username, account_password, server_id, created_at FROM vpn_accounts ORDER BY id DESC LIMIT 3"
+
+# Check Docker logs for errors
+docker logs vmaster_web --tail 50
+
+═══════════════════════════════════════════════════════════════
+📊 TO ADD MORE CREDENTIALS LATER (when pool runs low)
+═══════════════════════════════════════════════════════════════
+
+# Add 10 more SSTP credentials
+docker exec vmaster_db mysql -uroot -prootpassword vpn_cms_portal << 'EOF'
+INSERT INTO vpn_credentials_pool (vpn_type, username, password) VALUES 
+('sstp', 'sstp_user021', 'SecurePass021!@#'),
+('sstp', 'sstp_user022', 'SecurePass022!@#'),
+('sstp', 'sstp_user023', 'SecurePass023!@#'),
+('sstp', 'sstp_user024', 'SecurePass024!@#'),
+('sstp', 'sstp_user025', 'SecurePass025!@#'),
+('sstp', 'sstp_user026', 'SecurePass026!@#'),
+('sstp', 'sstp_user027', 'SecurePass027!@#'),
+('sstp', 'sstp_user028', 'SecurePass028!@#'),
+('sstp', 'sstp_user029', 'SecurePass029!@#'),
+('sstp', 'sstp_user030', 'SecurePass030!@#');
+EOF
+
+═══════════════════════════════════════════════════════════════
+✅ That's it! Your SSTP should work now.
+═══════════════════════════════════════════════════════════════
+

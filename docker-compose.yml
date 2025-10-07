@@ -1,0 +1,68 @@
+version: '3.8'
+
+services:
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: vpn_cms_web
+    ports:
+      - "8080:80"
+    volumes:
+      - ./public:/var/www/html/public
+      - ./config:/var/www/html/config
+      - ./includes:/var/www/html/includes
+      - ./admin:/var/www/html/admin
+      - ./customer:/var/www/html/customer
+      - ./assets:/var/www/html/assets
+      - ./uploads:/var/www/html/uploads
+    environment:
+      - DB_HOST=db
+      - DB_NAME=vpn_cms_portal
+      - DB_USER=vpn_user
+      - DB_PASS=vpn_secure_password
+    depends_on:
+      - db
+    restart: unless-stopped
+    networks:
+      - vpn_cms_network
+
+  db:
+    image: mysql:8.0
+    container_name: vpn_cms_db
+    ports:
+      - "3306:3306"
+    environment:
+      - MYSQL_ROOT_PASSWORD=root_secure_password
+      - MYSQL_DATABASE=vpn_cms_portal
+      - MYSQL_USER=vpn_user
+      - MYSQL_PASSWORD=vpn_secure_password
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./database/schema.sql:/docker-entrypoint-initdb.d/schema.sql
+    restart: unless-stopped
+    networks:
+      - vpn_cms_network
+
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin
+    container_name: vpn_cms_phpmyadmin
+    ports:
+      - "8081:80"
+    environment:
+      - PMA_HOST=db
+      - PMA_PORT=3306
+      - MYSQL_ROOT_PASSWORD=root_secure_password
+    depends_on:
+      - db
+    restart: unless-stopped
+    networks:
+      - vpn_cms_network
+
+volumes:
+  mysql_data:
+
+networks:
+  vpn_cms_network:
+    driver: bridge
+

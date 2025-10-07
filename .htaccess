@@ -1,0 +1,21 @@
+RewriteEngine On
+
+# Redirect ONLY root access to public directory
+RewriteCond %{REQUEST_URI} ^/$
+RewriteRule ^$ /public/index.php [L]
+
+# Security: Prevent access to sensitive files
+<FilesMatch "^\.">
+    Order allow,deny
+    Deny from all
+</FilesMatch>
+
+# Prevent directory listing
+Options -Indexes
+
+# PHP settings
+php_flag display_errors Off
+php_value max_execution_time 300
+php_value upload_max_filesize 10M
+php_value post_max_size 10M
+

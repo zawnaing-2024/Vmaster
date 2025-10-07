@@ -1,0 +1,70 @@
+# Environment files
+.env
+.env.local
+.env.production
+
+# Docker volumes data
+/data/
+/mysql_data/
+/vpn_db_data/
+/radius_db_data/
+
+# Uploads and generated files
+/uploads/*
+!/uploads/.gitkeep
+/uploads/qrcodes/*
+!/uploads/qrcodes/.gitkeep
+
+# Logs
+*.log
+/logs/
+error.log
+access.log
+
+# IDE and Editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Temporary files
+*.tmp
+*.temp
+/tmp/
+
+# Backup files
+*.bak
+*.backup
+*.old
+
+# PHP
+composer.phar
+/vendor/
+
+# Node modules (if using frontend build tools)
+node_modules/
+
+# Database dumps (sensitive)
+*.sql.gz
+backup_*.sql
+
+# Configuration backups
+config/*.bak
+*.conf.bak
+
+# Test files (keep test scripts but not results)
+test_results/
+
+# Cache
+cache/
+*.cache
+
+# Sessions
+sessions/
+
+# OS files
+Thumbs.db
+.Spotlight-V100
+.Trashes

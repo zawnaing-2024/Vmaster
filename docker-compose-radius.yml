@@ -1,0 +1,76 @@
+services:
+  web:
+    build: .
+    container_name: vpn_cms_web
+    ports:
+      - "80:80"
+    volumes:
+      - .:/var/www/html
+    depends_on:
+      - db
+      - radius-db
+    networks:
+      - vpn-network
+    environment:
+      - DB_HOST=db
+      - DB_NAME=vpn_cms_portal
+      - DB_USER=root
+      - DB_PASS=rootpassword
+      - RADIUS_DB_HOST=radius-db
+
+  db:
+    image: mysql:8.0
+    container_name: vpn_cms_db
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpassword
+      MYSQL_DATABASE: vpn_cms_portal
+      MYSQL_USER: vpn_user
+      MYSQL_PASSWORD: vpn_password
+    ports:
+      - "3306:3306"
+    volumes:
+      - vpn_db_data:/var/lib/mysql
+      - ./database:/docker-entrypoint-initdb.d
+    networks:
+      - vpn-network
+
+  radius-db:
+    image: mysql:8.0
+    container_name: radius_db
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpassword
+      MYSQL_DATABASE: radius
+      MYSQL_USER: radius
+      MYSQL_PASSWORD: radiuspass
+    ports:
+      - "3307:3306"
+    volumes:
+      - radius_db_data:/var/lib/mysql
+      - ./radius/schema.sql:/docker-entrypoint-initdb.d/schema.sql
+    networks:
+      - vpn-network
+    command: --default-authentication-plugin=mysql_native_password
+
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin
+    container_name: vpn_phpmyadmin
+    environment:
+      PMA_ARBITRARY: 1
+      PMA_HOST: db
+      PMA_PORT: 3306
+    ports:
+      - "8080:80"
+    depends_on:
+      - db
+      - radius-db
+    networks:
+      - vpn-network
+
+networks:
+  vpn-network:
+    driver: bridge
+
+volumes:
+  vpn_db_data:
+  radius_db_data:
+

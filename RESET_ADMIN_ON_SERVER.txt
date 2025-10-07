@@ -1,0 +1,108 @@
+═══════════════════════════════════════════════════════════
+🔐 RESET ADMIN PASSWORD ON UBUNTU SERVER
+═══════════════════════════════════════════════════════════
+
+STEP-BY-STEP INSTRUCTIONS:
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+STEP 1: SSH INTO YOUR UBUNTU SERVER
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+On your Mac, open Terminal and run:
+
+ssh root@52.77.246.57
+
+Or if using a different user:
+
+ssh your-username@52.77.246.57
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+STEP 2: GO TO VMASTER DIRECTORY
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+cd /var/www/vmaster
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+STEP 3: RESET ADMIN PASSWORD
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Copy-paste this ONE command:
+
+docker exec vmaster_web php /var/www/html/admin/reset-admin.php
+
+
+This will:
+  ✅ Create admin user if it doesn't exist
+  ✅ Reset password to 'admin123'
+  ✅ Set status to 'active'
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+STEP 4: VERIFY ADMIN USER EXISTS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Copy-paste this command:
+
+docker exec vmaster_db mysql -uroot -prootpassword vpn_cms_portal -e "SELECT id, username, email, status FROM admins"
+
+You should see:
++----+----------+-------------------+--------+
+| id | username | email             | status |
++----+----------+-------------------+--------+
+|  1 | admin    | admin@vmaster.vip | active |
++----+----------+-------------------+--------+
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+STEP 5: TRY LOGGING IN
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Visit: https://vmaster.vip/admin/login.php
+Or: http://vmaster.vip/admin/login.php (if SSL not setup yet)
+
+Login with:
+  Username: admin
+  Password: admin123
+
+
+═══════════════════════════════════════════════════════════
+IF IT STILL DOESN'T WORK
+═══════════════════════════════════════════════════════════
+
+Check if database was imported:
+
+docker exec vmaster_db mysql -uroot -prootpassword vpn_cms_portal -e "SHOW TABLES"
+
+If you see "Empty set" or no tables, import the schema:
+
+docker exec -i vmaster_db mysql -uroot -prootpassword vpn_cms_portal < database/schema.sql
+
+Then reset admin again:
+
+docker exec vmaster_web php /var/www/html/admin/reset-admin.php
+
+
+═══════════════════════════════════════════════════════════
+ALTERNATIVE: CREATE ADMIN DIRECTLY IN DATABASE
+═══════════════════════════════════════════════════════════
+
+If reset-admin.php doesn't work, create manually:
+
+docker exec vmaster_web php -r "
+require_once '/var/www/html/config/database.php';
+\$db = new Database();
+\$conn = \$db->getConnection();
+\$password = password_hash('admin123', PASSWORD_BCRYPT);
+\$stmt = \$conn->prepare('DELETE FROM admins WHERE username=?');
+\$stmt->execute(['admin']);
+\$stmt = \$conn->prepare('INSERT INTO admins (username, password, email, status) VALUES (?, ?, ?, ?)');
+\$stmt->execute(['admin', \$password, 'admin@vmaster.vip', 'active']);
+echo 'Admin created!';
+"
+
+
+🎯 After running any of these commands, try logging in!
+

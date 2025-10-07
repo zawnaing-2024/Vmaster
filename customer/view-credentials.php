@@ -88,16 +88,16 @@ $data = $result['data'];
         <div style="margin-bottom: 15px;">
             <label><strong>Username:</strong></label>
             <div class="code-block">
-                <button class="copy-btn" onclick="copyCredential('<?php echo htmlspecialchars($data['username']); ?>')">Copy</button>
-                <code><?php echo htmlspecialchars($data['username']); ?></code>
+                <button class="copy-btn" onclick="copyCredential('<?php echo htmlspecialchars($data['username'] ?? 'N/A'); ?>')">Copy</button>
+                <code><?php echo htmlspecialchars($data['username'] ?? 'N/A'); ?></code>
             </div>
         </div>
         
         <div style="margin-bottom: 15px;">
             <label><strong>Password:</strong></label>
             <div class="code-block">
-                <button class="copy-btn" onclick="copyCredential('<?php echo htmlspecialchars($data['password']); ?>')">Copy</button>
-                <code><?php echo htmlspecialchars($data['password']); ?></code>
+                <button class="copy-btn" onclick="copyCredential('<?php echo htmlspecialchars($data['password'] ?? 'N/A'); ?>')">Copy</button>
+                <code><?php echo htmlspecialchars($data['password'] ?? 'N/A'); ?></code>
             </div>
         </div>
         

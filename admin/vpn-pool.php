@@ -10,10 +10,8 @@ $messageType = '';
 
 // Handle bulk add credentials
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'bulk_add') {
-    $serverId = intval($_POST['server_id']);
     $serverType = sanitize($_POST['server_type']);
     $credentialsText = $_POST['credentials'];
-    $notes = sanitize($_POST['notes'] ?? '');
     
     try {
         // Parse credentials based on server type
@@ -27,34 +25,29 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
                 // Format: username:password
                 $parts = explode(':', $line, 2);
                 if (count($parts) === 2) {
-                    $stmt = $conn->prepare("INSERT INTO vpn_credentials_pool (server_id, server_type, credential_username, credential_password, notes) VALUES (?, ?, ?, ?, ?)");
-                    $stmt->execute([$serverId, $serverType, trim($parts[0]), trim($parts[1]), $notes]);
+                    // Use correct column names: vpn_type, username, password
+                    $stmt = $conn->prepare("INSERT INTO vpn_credentials_pool (vpn_type, username, password) VALUES (?, ?, ?)");
+                    $stmt->execute([$serverType, trim($parts[0]), trim($parts[1])]);
                     $added++;
                 }
             } elseif ($serverType === 'v2ray') {
-                // Format: UUID or full config JSON
-                $trimmed = trim($line);
-                if (strlen($trimmed) === 36 || strlen($trimmed) === 32) {
-                    // It's a UUID
-                    $stmt = $conn->prepare("INSERT INTO vpn_credentials_pool (server_id, server_type, credential_uuid, notes) VALUES (?, ?, ?, ?)");
-                    $stmt->execute([$serverId, $serverType, $trimmed, $notes]);
-                    $added++;
-                } else {
-                    // Try as JSON config
-                    $stmt = $conn->prepare("INSERT INTO vpn_credentials_pool (server_id, server_type, credential_config, notes) VALUES (?, ?, ?, ?)");
-                    $stmt->execute([$serverId, $serverType, $trimmed, $notes]);
+                // Format: username:password (same as SSTP for consistency)
+                $parts = explode(':', $line, 2);
+                if (count($parts) === 2) {
+                    $stmt = $conn->prepare("INSERT INTO vpn_credentials_pool (vpn_type, username, password) VALUES (?, ?, ?)");
+                    $stmt->execute([$serverType, trim($parts[0]), trim($parts[1])]);
                     $added++;
                 }
             }
         }
         
-        logActivity($conn, 'admin', $_SESSION['admin_id'], 'bulk_add_credentials', "Added $added credentials to pool for server ID: $serverId");
+        logActivity($conn, 'admin', $_SESSION['admin_id'], 'bulk_add_credentials', "Added $added credentials to pool");
         $message = "Successfully added $added credentials to the pool!";
         $messageType = 'success';
     } catch(Exception $e) {
-        $message = 'Failed to add credentials. Please check format.';
+        $message = 'Failed to add credentials. Error: ' . $e->getMessage();
         $messageType = 'error';
-        error_log($e->getMessage());
+        error_log("VPN Pool Add Error: " . $e->getMessage());
     }
 }
 

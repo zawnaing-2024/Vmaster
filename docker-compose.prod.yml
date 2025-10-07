@@ -1,0 +1,80 @@
+services:
+  web:
+    build: .
+    container_name: vmaster_web
+    restart: always
+    ports:
+      - "8000:80"
+    volumes:
+      - .:/var/www/html
+      - ./uploads:/var/www/html/uploads
+    depends_on:
+      - db
+      - radius-db
+    networks:
+      - vmaster-network
+    environment:
+      - DB_HOST=db
+      - DB_NAME=vpn_cms_portal
+      - DB_USER=root
+      - DB_PASS=${MYSQL_ROOT_PASSWORD:-rootpassword}
+      - RADIUS_DB_HOST=radius-db
+
+  db:
+    image: mysql:8.0
+    container_name: vmaster_db
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-rootpassword}
+      MYSQL_DATABASE: vpn_cms_portal
+      MYSQL_USER: vmaster_user
+      MYSQL_PASSWORD: ${DB_PASSWORD:-vmasterpass}
+    ports:
+      - "127.0.0.1:3306:3306"
+    volumes:
+      - vmaster_db_data:/var/lib/mysql
+    networks:
+      - vmaster-network
+    command: --default-authentication-plugin=mysql_native_password
+
+  radius-db:
+    image: mysql:8.0
+    container_name: vmaster_radius_db
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-rootpassword}
+      MYSQL_DATABASE: radius
+      MYSQL_USER: radius
+      MYSQL_PASSWORD: ${RADIUS_PASSWORD:-radiuspass}
+    ports:
+      - "127.0.0.1:3307:3306"
+    volumes:
+      - vmaster_radius_data:/var/lib/mysql
+    networks:
+      - vmaster-network
+    command: --default-authentication-plugin=mysql_native_password
+
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin
+    container_name: vmaster_phpmyadmin
+    restart: always
+    environment:
+      PMA_ARBITRARY: 1
+      PMA_HOST: db
+      PMA_PORT: 3306
+    ports:
+      - "127.0.0.1:8080:80"
+    depends_on:
+      - db
+      - radius-db
+    networks:
+      - vmaster-network
+
+networks:
+  vmaster-network:
+    driver: bridge
+
+volumes:
+  vmaster_db_data:
+  vmaster_radius_data:
+

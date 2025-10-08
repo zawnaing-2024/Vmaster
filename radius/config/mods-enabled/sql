@@ -1,0 +1,30 @@
+sql {
+    driver = "rlm_sql_mysql"
+    dialect = "mysql"
+
+    # Connection info
+    server = "radius-db"
+    port = 3306
+    login = "radius"
+    password = "radiuspass"
+    radius_db = "radius"
+
+    # Connection pool
+    pool {
+        start = 5
+        min = 4
+        max = 10
+        spare = 3
+        uses = 0
+        retry_delay = 30
+        lifetime = 0
+        idle_timeout = 60
+    }
+
+    # Set to 'yes' to read radius clients from the database ('nas' table)
+    read_clients = yes
+    client_table = "nas"
+
+    # Read database-specific queries
+    $INCLUDE ${modconfdir}/sql/main/${dialect}/queries.conf
+}

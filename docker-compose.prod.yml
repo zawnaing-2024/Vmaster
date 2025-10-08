@@ -70,6 +70,27 @@ services:
     networks:
       - vmaster-network
 
+  freeradius:
+    image: freeradius/freeradius-server:latest
+    container_name: vmaster_freeradius
+    restart: always
+    ports:
+      - "1812:1812/udp"  # RADIUS Authentication
+      - "1813:1813/udp"  # RADIUS Accounting
+    volumes:
+      - ./radius/config:/etc/raddb
+      - ./radius/logs:/var/log/radius
+    depends_on:
+      - radius-db
+    networks:
+      - vmaster-network
+    environment:
+      - RADIUS_DB_HOST=radius-db
+      - RADIUS_DB_PORT=3306
+      - RADIUS_DB_NAME=radius
+      - RADIUS_DB_USER=radius
+      - RADIUS_DB_PASS=radiuspass
+
 networks:
   vmaster-network:
     driver: bridge

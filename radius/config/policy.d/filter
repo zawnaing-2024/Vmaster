@@ -1,0 +1,25 @@
+policy filter_username {
+    if (!User-Name) {
+        reject
+    }
+    
+    if (User-Name =~ / /) {
+        reject
+    }
+    
+    if (User-Name =~ /@.*@/ ) {
+        reject
+    }
+    
+    if (User-Name =~ /\\.\\./ ) {
+        reject
+    }
+    
+    if (User-Name =~ /\\.$/)  {
+        reject
+    }
+    
+    if (User-Name =~ /@\\./)  {
+        reject
+    }
+}

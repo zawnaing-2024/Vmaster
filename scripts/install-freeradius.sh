@@ -43,6 +43,10 @@ echo "  Port: $MYSQL_PORT"
 echo "  Database: $MYSQL_DB"
 echo "  User: $MYSQL_USER"
 echo ""
+echo "ℹ️  NOTE: FreeRADIUS will CONNECT to your existing RADIUS database."
+echo "         It will NOT create a new database or delete existing data!"
+echo "         Your existing users in 'radcheck' table will work immediately."
+echo ""
 
 # Backup original config
 cp /etc/freeradius/3.0/mods-available/sql /etc/freeradius/3.0/mods-available/sql.backup.$(date +%Y%m%d)
@@ -78,6 +82,14 @@ echo ""
 ln -sf /etc/freeradius/3.0/mods-available/sql /etc/freeradius/3.0/mods-enabled/sql
 
 echo "Step 4: Configuring RADIUS clients..."
+
+# Check existing RADIUS users
+echo ""
+echo "Checking existing RADIUS database..."
+EXISTING_USERS=$(docker exec vmaster_radius_db mysql -uroot -prootpassword radius -se "SELECT COUNT(*) FROM radcheck WHERE attribute='Cleartext-Password';")
+echo "✅ Found $EXISTING_USERS existing users in RADIUS database"
+echo "   These users will work immediately after FreeRADIUS starts!"
+echo ""
 
 # Get SSTP server IPs from user
 echo ""

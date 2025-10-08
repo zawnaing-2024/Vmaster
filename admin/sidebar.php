@@ -23,6 +23,9 @@
         <a href="/admin/vpn-pool.php" class="menu-item <?php echo basename($_SERVER['PHP_SELF']) == 'vpn-pool.php' ? 'active' : ''; ?>">
             🎱 VPN Credentials Pool
         </a>
+        <a href="/admin/radius-clients.php" class="menu-item <?php echo basename($_SERVER['PHP_SELF']) == 'radius-clients.php' ? 'active' : ''; ?>">
+            🔐 RADIUS Clients
+        </a>
         <a href="/admin/activity-logs.php" class="menu-item <?php echo basename($_SERVER['PHP_SELF']) == 'activity-logs.php' ? 'active' : ''; ?>">
             📋 Activity Logs
         </a>

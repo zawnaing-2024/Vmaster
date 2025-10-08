@@ -1,9 +1,11 @@
 <?php
 require_once __DIR__ . '/../config/config.php';
 requireLogin('admin');
+require_once __DIR__ . '/../config/radius.php';
 
 $db = new Database();
 $conn = $db->getConnection();
+$radiusConn = getRadiusConnection();
 
 $message = '';
 $messageType = '';
@@ -25,13 +27,42 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $maxAccounts = intval($_POST['max_accounts']);
         $location = sanitize($_POST['location'] ?? '');
         $description = sanitize($_POST['description'] ?? '');
+        $radiusSecret = sanitize($_POST['radius_secret'] ?? 'testing123');
+        $addToRadius = isset($_POST['add_to_radius']) && $_POST['add_to_radius'] === '1';
         
         try {
             $stmt = $conn->prepare("INSERT INTO vpn_servers (server_name, server_type, server_host, server_port, api_url, api_key, api_secret, admin_username, admin_password, max_accounts, location, description, created_by) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
             $stmt->execute([$serverName, $serverType, $serverHost, $serverPort, $apiUrl, $apiKey, $apiSecret, $adminUsername, $adminPassword, $maxAccounts, $location, $description, $_SESSION['admin_id']]);
             
+            // If SSTP server and RADIUS enabled, add to RADIUS clients
+            if ($serverType === 'sstp' && $addToRadius && RADIUS_ENABLED && $radiusConn) {
+                try {
+                    // Check if already exists
+                    $stmt = $radiusConn->prepare("SELECT COUNT(*) as count FROM nas WHERE nasname = ?");
+                    $stmt->execute([$serverHost]);
+                    
+                    if ($stmt->fetch()['count'] == 0) {
+                        // Add to RADIUS clients
+                        $stmt = $radiusConn->prepare("INSERT INTO nas (nasname, shortname, type, secret, description) VALUES (?, ?, 'other', ?, ?)");
+                        $stmt->execute([
+                            $serverHost,
+                            strtolower(str_replace(' ', '-', $serverName)),
+                            $radiusSecret,
+                            "SSTP Server: $serverName"
+                        ]);
+                        $message = "VPN server added successfully! Also added to RADIUS clients. Remember to restart FreeRADIUS: docker-compose -f /var/www/vmaster/docker-compose.prod.yml restart freeradius";
+                    } else {
+                        $message = 'VPN server added successfully! (Already exists in RADIUS clients)';
+                    }
+                } catch(Exception $e) {
+                    error_log("Failed to add to RADIUS: " . $e->getMessage());
+                    $message = 'VPN server added successfully! But failed to add to RADIUS clients. You can add it manually in RADIUS Clients page.';
+                }
+            } else {
+                $message = 'VPN server added successfully!';
+            }
+            
             logActivity($conn, 'admin', $_SESSION['admin_id'], 'add_server', "Added VPN server: $serverName");
-            $message = 'VPN server added successfully!';
             $messageType = 'success';
         } catch(Exception $e) {
             $message = 'Failed to add server. Please try again.';
@@ -264,10 +295,67 @@ $pageTitle = 'VPN Servers - ' . SITE_NAME;
                     <textarea name="description" rows="3"></textarea>
                 </div>
                 
+                <!-- RADIUS Settings (for SSTP servers) -->
+                <div id="radiusSettings" style="display: none; border-top: 2px solid #e0e0e0; padding-top: 20px; margin-top: 20px;">
+                    <h3 style="color: #007bff; margin-bottom: 15px;">🔐 RADIUS Settings (Optional)</h3>
+                    <div class="form-group">
+                        <label style="display: flex; align-items: center; cursor: pointer;">
+                            <input type="checkbox" name="add_to_radius" value="1" id="addToRadiusCheckbox" style="margin-right: 10px; width: auto;">
+                            <span>Automatically add this SSTP server to RADIUS clients</span>
+                        </label>
+                        <small style="color: #666; display: block; margin-top: 5px;">
+                            ✅ Enable this to allow RADIUS authentication for this SSTP server
+                        </small>
+                    </div>
+                    
+                    <div id="radiusSecretField" style="display: none;">
+                        <div class="form-group">
+                            <label for="radius_secret">RADIUS Shared Secret *</label>
+                            <input type="text" name="radius_secret" id="radiusSecretInput" value="testing123" placeholder="Enter shared secret">
+                            <small style="color: #666;">
+                                This secret must match the one configured on your SSTP server's accel-ppp.conf
+                            </small>
+                        </div>
+                        <div style="background: #fff3cd; border-left: 4px solid #ffc107; padding: 12px; border-radius: 4px; margin-top: 10px;">
+                            <strong>⚠️ Important:</strong> After adding, you must:
+                            <ol style="margin: 10px 0 0 20px; padding: 0;">
+                                <li>Restart FreeRADIUS: <code style="background: #fff; padding: 2px 6px; border-radius: 3px;">docker-compose restart freeradius</code></li>
+                                <li>Configure your SSTP server's <code>/etc/accel-ppp.conf</code> with this secret</li>
+                            </ol>
+                        </div>
+                    </div>
+                </div>
+                
                 <button type="submit" class="btn btn-primary btn-block">Add Server</button>
             </form>
         </div>
     </div>
+    
+    <script>
+    // Show/hide RADIUS settings based on server type
+    document.querySelector('select[name="server_type"]').addEventListener('change', function() {
+        const radiusSettings = document.getElementById('radiusSettings');
+        if (this.value === 'sstp') {
+            radiusSettings.style.display = 'block';
+        } else {
+            radiusSettings.style.display = 'none';
+            document.getElementById('addToRadiusCheckbox').checked = false;
+            document.getElementById('radiusSecretField').style.display = 'none';
+        }
+    });
+    
+    // Show/hide secret field based on checkbox
+    document.getElementById('addToRadiusCheckbox').addEventListener('change', function() {
+        const secretField = document.getElementById('radiusSecretField');
+        if (this.checked) {
+            secretField.style.display = 'block';
+            document.getElementById('radiusSecretInput').required = true;
+        } else {
+            secretField.style.display = 'none';
+            document.getElementById('radiusSecretInput').required = false;
+        }
+    });
+    </script>
     
     <!-- Edit Server Modal -->
     <div id="editServerModal" class="modal">

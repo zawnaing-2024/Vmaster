@@ -25,15 +25,37 @@ class RadiusHandler {
                 return false;
             }
             
-            // Insert user with password
+            // Insert Cleartext-Password (for PAP authentication)
             $stmt = $this->radiusConn->prepare("INSERT INTO radcheck (username, attribute, op, value) VALUES (?, 'Cleartext-Password', ':=', ?)");
             $stmt->execute([$username, $password]);
             
-            error_log("RADIUS user created: $username");
+            // Generate and insert NT-Password (for MS-CHAP authentication)
+            $ntPassword = $this->generateNTPassword($password);
+            if ($ntPassword) {
+                $stmt = $this->radiusConn->prepare("INSERT INTO radcheck (username, attribute, op, value) VALUES (?, 'NT-Password', ':=', ?)");
+                $stmt->execute([$username, $ntPassword]);
+            }
+            
+            error_log("RADIUS user created: $username (with Cleartext and NT-Password)");
             return true;
         } catch(Exception $e) {
             error_log("RADIUS createUser failed: " . $e->getMessage());
             return false;
+        }
+    }
+    
+    /**
+     * Generate NT-Password hash for MS-CHAP authentication
+     */
+    private function generateNTPassword($password) {
+        try {
+            // Convert password to UTF-16LE and hash with MD4
+            $utf16le = mb_convert_encoding($password, 'UTF-16LE', 'UTF-8');
+            $hash = hash('md4', $utf16le);
+            return strtoupper($hash);
+        } catch(Exception $e) {
+            error_log("Failed to generate NT-Password: " . $e->getMessage());
+            return null;
         }
     }
     

@@ -60,17 +60,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
     $clientData = $stmt->fetch();
     $clientMaxVpn = $clientData['max_vpn_accounts'] ?? $customer['max_vpn_per_client'];
     
-    // Check if client already has an account on this server
-    $stmt = $conn->prepare("SELECT COUNT(*) as count FROM vpn_accounts WHERE staff_id = ? AND server_id = ? AND status = 'active'");
-    $stmt->execute([$clientId, $serverId]);
-    $existingAccount = $stmt->fetch()['count'];
-    
-    if ($existingAccount > 0) {
-        $message = 'This client already has an active VPN account on this server. Each client can only have one account per server.';
-        $messageType = 'error';
-    }
     // Check limits (only if a limit is set)
-    elseif ($clientMaxVpn !== null && $clientVpnAccounts >= $clientMaxVpn) {
+    if ($clientMaxVpn !== null && $clientVpnAccounts >= $clientMaxVpn) {
         $message = 'This client has reached the maximum VPN accounts allowed (' . $clientMaxVpn . ' VPN accounts).';
         $messageType = 'error';
     } else {
@@ -174,14 +165,9 @@ $stmt = $conn->prepare("SELECT c.id, c.staff_name, c.max_vpn_accounts,
 $stmt->execute([$_SESSION['customer_id']]);
 $clientList = $stmt->fetchAll();
 
-// Get active servers with account count per client
+// Get active servers
 $stmt = $conn->query("SELECT * FROM vpn_servers WHERE status = 'active' ORDER BY server_name");
 $servers = $stmt->fetchAll();
-
-// Get list of servers that already have accounts (for validation)
-$stmt = $conn->prepare("SELECT DISTINCT server_id FROM vpn_accounts WHERE customer_id = ? AND status = 'active'");
-$stmt->execute([$_SESSION['customer_id']]);
-$usedServers = $stmt->fetchAll(PDO::FETCH_COLUMN);
 
 $pageTitle = 'VPN Accounts - ' . SITE_NAME;
 ?>
@@ -326,7 +312,7 @@ $pageTitle = 'VPN Accounts - ' . SITE_NAME;
                     
                     <div class="form-group">
                         <label for="client_id">Select Client *</label>
-                        <select name="client_id" id="client_id" required onchange="checkDuplicateAccount()">
+                        <select name="client_id" required>
                             <option value="">-- Choose Client --</option>
                             <?php foreach ($clientList as $client): ?>
                                 <?php 
@@ -356,7 +342,7 @@ $pageTitle = 'VPN Accounts - ' . SITE_NAME;
                     
                     <div class="form-group">
                         <label for="server_id">Select VPN Server *</label>
-                        <select name="server_id" id="server_id" required onchange="showServerInfo(this); checkDuplicateAccount()">
+                        <select name="server_id" required onchange="showServerInfo(this)">
                             <option value="">-- Choose Server --</option>
                             <?php foreach ($servers as $server): ?>
                                 <option value="<?php echo $server['id']; ?>" 
@@ -456,44 +442,6 @@ $pageTitle = 'VPN Accounts - ' . SITE_NAME;
     
     <script src="/assets/js/main.js"></script>
     <script>
-    // Store client-server combinations that already exist
-    const existingAccounts = {};
-    <?php
-    // Get all existing active accounts for JavaScript validation
-    $stmt = $conn->prepare("SELECT staff_id, server_id FROM vpn_accounts WHERE customer_id = ? AND status = 'active'");
-    $stmt->execute([$_SESSION['customer_id']]);
-    $existingAccountsList = $stmt->fetchAll();
-    foreach ($existingAccountsList as $acc) {
-        echo "existingAccounts['{$acc['staff_id']}_{$acc['server_id']}'] = true;\n";
-    }
-    ?>
-    
-    function checkDuplicateAccount() {
-        const clientSelect = document.querySelector('select[name="client_id"]');
-        const serverSelect = document.querySelector('select[name="server_id"]');
-        const submitBtn = document.querySelector('button[type="submit"]');
-        
-        if (clientSelect && serverSelect && clientSelect.value && serverSelect.value) {
-            const key = clientSelect.value + '_' + serverSelect.value;
-            const warningDiv = document.getElementById('duplicateWarning');
-            
-            if (existingAccounts[key]) {
-                if (!warningDiv) {
-                    const warning = document.createElement('div');
-                    warning.id = 'duplicateWarning';
-                    warning.className = 'alert alert-error';
-                    warning.style.marginTop = '15px';
-                    warning.innerHTML = '⚠️ <strong>Warning:</strong> This client already has an active VPN account on this server. Each client can only have one account per server.';
-                    serverSelect.closest('.form-group').appendChild(warning);
-                }
-                if (submitBtn) submitBtn.disabled = true;
-            } else {
-                if (warningDiv) warningDiv.remove();
-                if (submitBtn) submitBtn.disabled = false;
-            }
-        }
-    }
-    
     function showServerInfo(select) {
         const option = select.options[select.selectedIndex];
         if (option.value) {

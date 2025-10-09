@@ -1,0 +1,26 @@
+[
+    {
+        "merged": "com.vmaster.vpn.app-merged_res-69:/menu_main_menu.xml.flat",
+        "source": "com.vmaster.vpn.app-main-71:/menu/main_menu.xml"
+    },
+    {
+        "merged": "com.vmaster.vpn.app-merged_res-69:/layout_activity_main.xml.flat",
+        "source": "com.vmaster.vpn.app-main-71:/layout/activity_main.xml"
+    },
+    {
+        "merged": "com.vmaster.vpn.app-merged_res-69:/layout_activity_login.xml.flat",
+        "source": "com.vmaster.vpn.app-main-71:/layout/activity_login.xml"
+    },
+    {
+        "merged": "com.vmaster.vpn.app-merged_res-69:/xml_data_extraction_rules.xml.flat",
+        "source": "com.vmaster.vpn.app-main-71:/xml/data_extraction_rules.xml"
+    },
+    {
+        "merged": "com.vmaster.vpn.app-merged_res-69:/xml_backup_rules.xml.flat",
+        "source": "com.vmaster.vpn.app-main-71:/xml/backup_rules.xml"
+    },
+    {
+        "merged": "com.vmaster.vpn.app-merged_res-69:/layout_item_vpn_account.xml.flat",
+        "source": "com.vmaster.vpn.app-main-71:/layout/item_vpn_account.xml"
+    }
+]

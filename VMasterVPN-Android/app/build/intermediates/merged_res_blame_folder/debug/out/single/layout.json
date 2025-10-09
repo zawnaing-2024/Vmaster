@@ -1,0 +1,14 @@
+[
+    {
+        "merged": "com.vmaster.vpn.app-mergeDebugResources-68:/layout/item_vpn_account.xml",
+        "source": "com.vmaster.vpn.app-main-71:/layout/item_vpn_account.xml"
+    },
+    {
+        "merged": "com.vmaster.vpn.app-mergeDebugResources-68:/layout/activity_main.xml",
+        "source": "com.vmaster.vpn.app-main-71:/layout/activity_main.xml"
+    },
+    {
+        "merged": "com.vmaster.vpn.app-mergeDebugResources-68:/layout/activity_login.xml",
+        "source": "com.vmaster.vpn.app-main-71:/layout/activity_login.xml"
+    }
+]

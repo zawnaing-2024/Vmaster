@@ -86,6 +86,9 @@ dependencies {
     // Gson for JSON
     implementation 'com.google.code.gson:gson:2.10.1'
     
+    // Security for encrypted preferences
+    implementation 'androidx.security:security-crypto:1.1.0-alpha06'
+    
     // Note: Shadowsocks library will be added later for VPN implementation
     
     // DataStore for preferences

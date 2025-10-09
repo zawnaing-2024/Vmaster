@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VMaster Mobile API Tester</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 20px;
+            min-height: 100vh;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+        h1 {
+            color: #667eea;
+            margin-bottom: 10px;
+        }
+        .subtitle {
+            color: #64748b;
+            margin-bottom: 30px;
+        }
+        .section {
+            margin-bottom: 30px;
+            padding: 20px;
+            background: #f8fafc;
+            border-radius: 10px;
+            border-left: 4px solid #667eea;
+        }
+        h2 {
+            color: #334155;
+            margin-bottom: 15px;
+            font-size: 1.2rem;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            color: #475569;
+            font-weight: 500;
+        }
+        input, textarea {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            font-size: 14px;
+        }
+        input:focus, textarea:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            width: 100%;
+            transition: transform 0.2s;
+        }
+        button:hover {
+            transform: translateY(-2px);
+        }
+        button:active {
+            transform: translateY(0);
+        }
+        .response {
+            margin-top: 15px;
+            padding: 15px;
+            background: white;
+            border-radius: 8px;
+            border: 2px solid #e2e8f0;
+            font-family: monospace;
+            font-size: 12px;
+            max-height: 400px;
+            overflow-y: auto;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+        .success { border-color: #10b981; background: #f0fdf4; }
+        .error { border-color: #ef4444; background: #fef2f2; }
+        .token-display {
+            background: #fef3c7;
+            padding: 10px;
+            border-radius: 5px;
+            margin-top: 10px;
+            font-size: 11px;
+            word-break: break-all;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>📱 VMaster Mobile API Tester</h1>
+        <p class="subtitle">Test the API endpoints for the mobile app</p>
+        
+        <!-- Login API Test -->
+        <div class="section">
+            <h2>🔐 1. Test Login API</h2>
+            <div class="form-group">
+                <label>Client Username:</label>
+                <input type="text" id="loginUsername" placeholder="Enter client username">
+            </div>
+            <div class="form-group">
+                <label>Password:</label>
+                <input type="password" id="loginPassword" placeholder="Enter password">
+            </div>
+            <button onclick="testLogin()">Test Login</button>
+            <div id="loginResponse" class="response" style="display:none;"></div>
+            <div id="tokenDisplay" class="token-display" style="display:none;">
+                <strong>Token (save this for next test):</strong><br>
+                <span id="tokenValue"></span>
+            </div>
+        </div>
+        
+        <!-- Get VPN Accounts API Test -->
+        <div class="section">
+            <h2>🔑 2. Test Get VPN Accounts API</h2>
+            <div class="form-group">
+                <label>Authorization Token:</label>
+                <textarea id="authToken" rows="3" placeholder="Paste token from login response"></textarea>
+            </div>
+            <button onclick="testGetAccounts()">Get VPN Accounts</button>
+            <div id="accountsResponse" class="response" style="display:none;"></div>
+        </div>
+        
+        <!-- Connection Status API Test -->
+        <div class="section">
+            <h2>📊 3. Test Connection Status API</h2>
+            <div class="form-group">
+                <label>Authorization Token:</label>
+                <textarea id="statusToken" rows="3" placeholder="Paste token from login response"></textarea>
+            </div>
+            <div class="form-group">
+                <label>Account ID:</label>
+                <input type="number" id="accountId" placeholder="Enter VPN account ID">
+            </div>
+            <div class="form-group">
+                <label>Status:</label>
+                <select id="connectionStatus">
+                    <option value="connected">Connected</option>
+                    <option value="disconnected">Disconnected</option>
+                    <option value="connecting">Connecting</option>
+                </select>
+            </div>
+            <button onclick="testConnectionStatus()">Report Status</button>
+            <div id="statusResponse" class="response" style="display:none;"></div>
+        </div>
+    </div>
+    
+    <script>
+        const API_BASE = window.location.origin;
+        
+        async function testLogin() {
+            const username = document.getElementById('loginUsername').value;
+            const password = document.getElementById('loginPassword').value;
+            const responseDiv = document.getElementById('loginResponse');
+            const tokenDisplay = document.getElementById('tokenDisplay');
+            const tokenValue = document.getElementById('tokenValue');
+            
+            if (!username || !password) {
+                alert('Please enter username and password');
+                return;
+            }
+            
+            try {
+                const response = await fetch(`${API_BASE}/api/client/login.php`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        username: username,
+                        password: password
+                    })
+                });
+                
+                const data = await response.json();
+                
+                responseDiv.style.display = 'block';
+                responseDiv.className = 'response ' + (data.success ? 'success' : 'error');
+                responseDiv.textContent = JSON.stringify(data, null, 2);
+                
+                if (data.success && data.token) {
+                    tokenDisplay.style.display = 'block';
+                    tokenValue.textContent = data.token;
+                    
+                    // Auto-fill token in other sections
+                    document.getElementById('authToken').value = data.token;
+                    document.getElementById('statusToken').value = data.token;
+                }
+            } catch (error) {
+                responseDiv.style.display = 'block';
+                responseDiv.className = 'response error';
+                responseDiv.textContent = 'Error: ' + error.message;
+            }
+        }
+        
+        async function testGetAccounts() {
+            const token = document.getElementById('authToken').value;
+            const responseDiv = document.getElementById('accountsResponse');
+            
+            if (!token) {
+                alert('Please enter authorization token');
+                return;
+            }
+            
+            try {
+                const response = await fetch(`${API_BASE}/api/client/vpn-accounts.php`, {
+                    method: 'GET',
+                    headers: {
+                        'Authorization': 'Bearer ' + token
+                    }
+                });
+                
+                const data = await response.json();
+                
+                responseDiv.style.display = 'block';
+                responseDiv.className = 'response ' + (data.success ? 'success' : 'error');
+                responseDiv.textContent = JSON.stringify(data, null, 2);
+                
+                // Auto-fill first account ID if available
+                if (data.success && data.accounts && data.accounts.length > 0) {
+                    document.getElementById('accountId').value = data.accounts[0].id;
+                }
+            } catch (error) {
+                responseDiv.style.display = 'block';
+                responseDiv.className = 'response error';
+                responseDiv.textContent = 'Error: ' + error.message;
+            }
+        }
+        
+        async function testConnectionStatus() {
+            const token = document.getElementById('statusToken').value;
+            const accountId = document.getElementById('accountId').value;
+            const status = document.getElementById('connectionStatus').value;
+            const responseDiv = document.getElementById('statusResponse');
+            
+            if (!token || !accountId) {
+                alert('Please enter token and account ID');
+                return;
+            }
+            
+            try {
+                const response = await fetch(`${API_BASE}/api/client/connection-status.php`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': 'Bearer ' + token
+                    },
+                    body: JSON.stringify({
+                        account_id: parseInt(accountId),
+                        status: status,
+                        connected_at: new Date().toISOString(),
+                        ip_address: 'test_ip'
+                    })
+                });
+                
+                const data = await response.json();
+                
+                responseDiv.style.display = 'block';
+                responseDiv.className = 'response ' + (data.success ? 'success' : 'error');
+                responseDiv.textContent = JSON.stringify(data, null, 2);
+            } catch (error) {
+                responseDiv.style.display = 'block';
+                responseDiv.className = 'response error';
+                responseDiv.textContent = 'Error: ' + error.message;
+            }
+        }
+    </script>
+</body>
+</html>
+

@@ -1,70 +1,45 @@
-# Environment files
+# Ignore sensitive files and user data
 .env
 .env.local
 .env.production
 
-# Docker volumes data
-/data/
-/mysql_data/
-/vpn_db_data/
-/radius_db_data/
+# Database backups
+*.sql
+backup_*.sql
 
-# Uploads and generated files
-/uploads/*
-!/uploads/.gitkeep
-/uploads/qrcodes/*
-!/uploads/qrcodes/.gitkeep
+# Uploads and user-generated content
+uploads/*
+!uploads/.gitkeep
+uploads/qrcodes/*
+!uploads/qrcodes/.gitkeep
 
 # Logs
 *.log
-/logs/
-error.log
-access.log
+logs/*
+radius/logs/*
 
-# IDE and Editor files
+# Docker volumes
+docker-volumes/*
+
+# IDE and OS files
+.DS_Store
 .vscode/
 .idea/
 *.swp
 *.swo
 *~
-.DS_Store
 
 # Temporary files
-*.tmp
-*.temp
-/tmp/
+tmp/*
+temp/*
+cache/*
 
-# Backup files
-*.bak
-*.backup
-*.old
-
-# PHP
-composer.phar
-/vendor/
-
-# Node modules (if using frontend build tools)
+# Node modules (if any)
 node_modules/
 
-# Database dumps (sensitive)
-*.sql.gz
-backup_*.sql
+# Composer vendor (if any)
+vendor/
 
-# Configuration backups
-config/*.bak
-*.conf.bak
-
-# Test files (keep test scripts but not results)
-test_results/
-
-# Cache
-cache/
-*.cache
-
-# Sessions
-sessions/
-
-# OS files
-Thumbs.db
-.Spotlight-V100
-.Trashes
+# Environment-specific configs (keep templates only)
+config/config.php
+!config/config.example.php

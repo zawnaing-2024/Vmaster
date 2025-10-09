@@ -20,6 +20,23 @@ $customer = $stmt->fetch();
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'create') {
     $clientId = intval($_POST['client_id']);
     $serverId = intval($_POST['server_id']);
+    $planType = $_POST['plan_type'] ?? 'unlimited';
+    $planDuration = null;
+    $customExpiryDate = null;
+    
+    // Handle different plan types
+    if ($planType === 'preset' && isset($_POST['plan_duration']) && $_POST['plan_duration'] !== '') {
+        $planDuration = intval($_POST['plan_duration']);
+    } elseif ($planType === 'custom' && isset($_POST['custom_end_date']) && $_POST['custom_end_date'] !== '') {
+        $customExpiryDate = $_POST['custom_end_date'];
+        // Calculate duration in months for display purposes
+        $startDate = isset($_POST['custom_start_date']) && $_POST['custom_start_date'] !== '' 
+            ? new DateTime($_POST['custom_start_date']) 
+            : new DateTime();
+        $endDate = new DateTime($customExpiryDate);
+        $interval = $startDate->diff($endDate);
+        $planDuration = ($interval->y * 12) + $interval->m; // Convert to months for storage
+    }
     
     // Check total VPN accounts for this customer (if limit set)
     $stmt = $conn->prepare("SELECT COUNT(*) as total FROM vpn_accounts WHERE customer_id = ?");
@@ -48,7 +65,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
         $message = 'This client has reached the maximum VPN accounts allowed (' . $clientMaxVpn . ' VPN accounts).';
         $messageType = 'error';
     } else {
-        $result = $vpnHandler->createVPNAccount($_SESSION['customer_id'], $clientId, $serverId);
+        $result = $vpnHandler->createVPNAccount($_SESSION['customer_id'], $clientId, $serverId, $planDuration, $customExpiryDate);
         
         if ($result['success']) {
             logActivity($conn, 'customer', $_SESSION['customer_id'], 'create_vpn_account', "Created VPN account for client ID: $clientId");
@@ -125,7 +142,12 @@ if (isset($_GET['delete'])) {
 }
 
 // Get all VPN accounts for this customer with status
-$stmt = $conn->prepare("SELECT va.*, vs.server_name, vs.server_type, vs.server_host, vs.server_port, s.staff_name, s.status as client_status 
+$stmt = $conn->prepare("SELECT va.*, vs.server_name, vs.server_type, vs.server_host, vs.server_port, s.staff_name, s.status as client_status,
+    CASE 
+        WHEN va.expires_at IS NULL THEN 'unlimited'
+        WHEN va.expires_at > NOW() THEN 'active'
+        ELSE 'expired'
+    END as expiration_status
     FROM vpn_accounts va 
     JOIN vpn_servers vs ON va.server_id = vs.id 
     JOIN client_accounts s ON va.staff_id = s.id 
@@ -191,6 +213,8 @@ $pageTitle = 'VPN Accounts - ' . SITE_NAME;
                                 <th>Staff Name</th>
                                 <th>Server</th>
                                 <th>Type</th>
+                                <th>Plan</th>
+                                <th>Expires</th>
                                 <th>Status</th>
                                 <th>Created</th>
                                 <th>Actions</th>
@@ -207,17 +231,41 @@ $pageTitle = 'VPN Accounts - ' . SITE_NAME;
                                                 <?php echo strtoupper($account['server_type']); ?>
                                             </span>
                                         </td>
-                                        <td><?php echo formatDate($account['created_at']); ?></td>
+                                        <td>
+                                            <?php 
+                                            if (isset($account['plan_duration']) && $account['plan_duration']) {
+                                                echo $account['plan_duration'] . ' month' . ($account['plan_duration'] > 1 ? 's' : '');
+                                            } else {
+                                                echo '<span style="color: #10b981;">Unlimited</span>';
+                                            }
+                                            ?>
+                                        </td>
+                                        <td>
+                                            <?php 
+                                            if ($account['expiration_status'] === 'unlimited') {
+                                                echo '<span class="badge badge-success">Never</span>';
+                                            } elseif ($account['expiration_status'] === 'expired') {
+                                                echo '<span class="badge badge-danger">' . formatDate($account['expires_at']) . '</span>';
+                                            } else {
+                                                $daysLeft = ceil((strtotime($account['expires_at']) - time()) / 86400);
+                                                $expiryBadge = $daysLeft <= 7 ? 'badge-warning' : 'badge-info';
+                                                echo '<span class="badge ' . $expiryBadge . '">' . formatDate($account['expires_at']) . '</span>';
+                                                echo '<br><small style="color: #64748b;">' . $daysLeft . ' days left</small>';
+                                            }
+                                            ?>
+                                        </td>
                                         <td>
                                             <?php
                                             $badgeClass = 'badge-success';
                                             if ($account['status'] === 'suspended') $badgeClass = 'badge-warning';
                                             if ($account['status'] === 'inactive') $badgeClass = 'badge-danger';
+                                            if ($account['expiration_status'] === 'expired') $badgeClass = 'badge-danger';
                                             ?>
                                             <span class="badge <?php echo $badgeClass; ?>">
-                                                <?php echo ucfirst($account['status']); ?>
+                                                <?php echo $account['expiration_status'] === 'expired' ? 'Expired' : ucfirst($account['status']); ?>
                                             </span>
                                         </td>
+                                        <td><?php echo formatDate($account['created_at']); ?></td>
                                         <td class="action-buttons">
                                             <button class="btn btn-small btn-success" onclick="viewCredentials(<?php echo $account['id']; ?>)">📋 View</button>
                                             <button class="btn btn-small btn-info" onclick="shareAccount(<?php echo $account['id']; ?>)">📤 Share</button>
@@ -227,7 +275,7 @@ $pageTitle = 'VPN Accounts - ' . SITE_NAME;
                                 <?php endforeach; ?>
                             <?php else: ?>
                                 <tr>
-                                    <td colspan="6" class="empty-state">
+                                    <td colspan="8" class="empty-state">
                                         <div class="empty-state-icon">🔑</div>
                                         <p>No VPN accounts yet. Click "Create VPN Account" to get started.</p>
                                     </td>
@@ -310,6 +358,58 @@ $pageTitle = 'VPN Accounts - ' . SITE_NAME;
                         </select>
                     </div>
                     
+                    <div class="form-group">
+                        <label for="plan_duration">Plan Duration</label>
+                        <select name="plan_type" id="plan_type" onchange="toggleCustomPlan(this)">
+                            <option value="unlimited">Unlimited (No Expiration)</option>
+                            <option value="preset">Preset Plans</option>
+                            <option value="custom">Custom Date Range</option>
+                        </select>
+                    </div>
+                    
+                    <!-- Preset Plans -->
+                    <div id="presetPlans" style="display: none;">
+                        <div class="form-group">
+                            <label for="plan_duration">Select Plan</label>
+                            <select name="plan_duration" id="plan_duration" onchange="updatePlanInfo(this)">
+                                <option value="">-- Choose Duration --</option>
+                                <option value="1">1 Month Plan</option>
+                                <option value="2">2 Months Plan</option>
+                                <option value="3">3 Months Plan</option>
+                                <option value="6">6 Months Plan</option>
+                                <option value="12">1 Year Plan</option>
+                            </select>
+                            <small style="color: #64748b; margin-top: 5px; display: block;">
+                                Account will expire after the selected duration from creation date
+                            </small>
+                            <div id="planInfo" style="display: none; margin-top: 10px; padding: 10px; background: #e0f2fe; border-left: 3px solid #0284c7; border-radius: 4px;">
+                                <strong>📅 Expiration Date:</strong> <span id="expiryDate"></span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Custom Date Range -->
+                    <div id="customPlan" style="display: none;">
+                        <div class="form-group">
+                            <label for="custom_start_date">Start Date</label>
+                            <input type="date" name="custom_start_date" id="custom_start_date" onchange="updateCustomPlan()">
+                            <small style="color: #64748b; margin-top: 5px; display: block;">
+                                Leave empty to start from today
+                            </small>
+                        </div>
+                        <div class="form-group">
+                            <label for="custom_end_date">End Date *</label>
+                            <input type="date" name="custom_end_date" id="custom_end_date" onchange="updateCustomPlan()">
+                            <small style="color: #64748b; margin-top: 5px; display: block;">
+                                Choose when the account should expire
+                            </small>
+                        </div>
+                        <div id="customPlanInfo" style="display: none; margin-top: 10px; padding: 10px; background: #fef3c7; border-left: 3px solid #f59e0b; border-radius: 4px;">
+                            <strong>📅 Duration:</strong> <span id="customDuration"></span><br>
+                            <strong>🗓️ Expires:</strong> <span id="customExpiry"></span>
+                        </div>
+                    </div>
+                    
                     <div id="serverInfo" style="display:none; margin-top: 15px; padding: 15px; background: #f8fafc; border-radius: 8px;">
                         <h4 style="margin-bottom: 10px;">Server Information</h4>
                         <p><strong>Type:</strong> <span id="infoType"></span></p>
@@ -351,6 +451,79 @@ $pageTitle = 'VPN Accounts - ' . SITE_NAME;
             document.getElementById('infoCapacity').textContent = option.dataset.capacity;
         } else {
             document.getElementById('serverInfo').style.display = 'none';
+        }
+    }
+    
+    function toggleCustomPlan(select) {
+        const planType = select.value;
+        const presetPlans = document.getElementById('presetPlans');
+        const customPlan = document.getElementById('customPlan');
+        
+        // Hide all sections first
+        presetPlans.style.display = 'none';
+        customPlan.style.display = 'none';
+        
+        // Show selected section
+        if (planType === 'preset') {
+            presetPlans.style.display = 'block';
+        } else if (planType === 'custom') {
+            customPlan.style.display = 'block';
+            // Set min date to today
+            const today = new Date().toISOString().split('T')[0];
+            document.getElementById('custom_start_date').setAttribute('min', today);
+            document.getElementById('custom_end_date').setAttribute('min', today);
+        }
+    }
+    
+    function updatePlanInfo(select) {
+        const months = parseInt(select.value);
+        const planInfo = document.getElementById('planInfo');
+        const expiryDate = document.getElementById('expiryDate');
+        
+        if (months > 0) {
+            const expiry = new Date();
+            expiry.setMonth(expiry.getMonth() + months);
+            const options = { year: 'numeric', month: 'long', day: 'numeric' };
+            expiryDate.textContent = expiry.toLocaleDateString('en-US', options);
+            planInfo.style.display = 'block';
+        } else {
+            planInfo.style.display = 'none';
+        }
+    }
+    
+    function updateCustomPlan() {
+        const startDate = document.getElementById('custom_start_date').value;
+        const endDate = document.getElementById('custom_end_date').value;
+        const customPlanInfo = document.getElementById('customPlanInfo');
+        const customDuration = document.getElementById('customDuration');
+        const customExpiry = document.getElementById('customExpiry');
+        
+        if (endDate) {
+            const start = startDate ? new Date(startDate) : new Date();
+            const end = new Date(endDate);
+            
+            // Calculate duration in days
+            const diffTime = Math.abs(end - start);
+            const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+            const diffMonths = Math.floor(diffDays / 30);
+            const remainingDays = diffDays % 30;
+            
+            let durationText = '';
+            if (diffMonths > 0) {
+                durationText = diffMonths + ' month' + (diffMonths > 1 ? 's' : '');
+                if (remainingDays > 0) {
+                    durationText += ' and ' + remainingDays + ' day' + (remainingDays > 1 ? 's' : '');
+                }
+            } else {
+                durationText = diffDays + ' day' + (diffDays > 1 ? 's' : '');
+            }
+            
+            const options = { year: 'numeric', month: 'long', day: 'numeric' };
+            customDuration.textContent = durationText + ' (' + diffDays + ' days total)';
+            customExpiry.textContent = end.toLocaleDateString('en-US', options);
+            customPlanInfo.style.display = 'block';
+        } else {
+            customPlanInfo.style.display = 'none';
         }
     }
     

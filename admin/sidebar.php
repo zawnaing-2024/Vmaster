@@ -1,6 +1,9 @@
 <aside class="sidebar">
     <div class="sidebar-header">
-        <h2 style="font-size: 1.8rem; font-weight: 800; background: linear-gradient(135deg, #a855f7 0%, #6366f1 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">VMaster</h2>
+        <div style="text-align: center; margin-bottom: 10px;">
+            <img src="/assets/images/logo.jpg" alt="VMaster Logo" style="max-width: 120px; height: auto; border-radius: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
+        </div>
+        <h2 style="font-size: 1.5rem; font-weight: 800; background: linear-gradient(135deg, #a855f7 0%, #6366f1 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">VMaster</h2>
         <p>Admin Control Panel</p>
     </div>
     

@@ -52,6 +52,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <body>
     <div class="login-container">
         <div class="login-card">
+            <div style="text-align: center; margin-bottom: 20px;">
+                <img src="/assets/images/logo.jpg" alt="VMaster Logo" style="max-width: 150px; height: auto; border-radius: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
+            </div>
             <h1>👤 Customer Login</h1>
             <p class="subtitle"><?php echo SITE_NAME; ?></p>
             

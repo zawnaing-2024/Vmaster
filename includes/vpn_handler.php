@@ -154,7 +154,7 @@ class VPNHandler {
     /**
      * Create VPN Account
      */
-    public function createVPNAccount($customerId, $clientId, $serverId) {
+    public function createVPNAccount($customerId, $clientId, $serverId, $planDuration = null, $customExpiryDate = null) {
         try {
             // Get server details
             $stmt = $this->conn->prepare("SELECT * FROM vpn_servers WHERE id = ? AND status = 'active'");
@@ -273,9 +273,19 @@ class VPNHandler {
                     break;
             }
             
+            // Calculate expiration date
+            $expiresAt = null;
+            if ($customExpiryDate) {
+                // Use custom expiry date if provided
+                $expiresAt = date('Y-m-d H:i:s', strtotime($customExpiryDate . ' 23:59:59'));
+            } elseif ($planDuration && $planDuration > 0) {
+                // Use plan duration if specified
+                $expiresAt = date('Y-m-d H:i:s', strtotime("+{$planDuration} months"));
+            }
+            
             // Insert VPN account
-            $stmt = $this->conn->prepare("INSERT INTO vpn_accounts (customer_id, staff_id, server_id, account_username, account_password, access_key, config_data, pool_credential_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?)");
-            $stmt->execute([$customerId, $clientId, $serverId, $username, $password, $accessKey, $configData, $poolCredentialId ?? null]);
+            $stmt = $this->conn->prepare("INSERT INTO vpn_accounts (customer_id, staff_id, server_id, account_username, account_password, access_key, config_data, pool_credential_id, plan_duration, expires_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+            $stmt->execute([$customerId, $clientId, $serverId, $username, $password, $accessKey, $configData, $poolCredentialId ?? null, $planDuration, $expiresAt]);
             
             $accountId = $this->conn->lastInsertId();
             

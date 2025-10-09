@@ -30,6 +30,9 @@ require_once __DIR__ . '/../config/config.php';
 <body>
     <div class="welcome-container">
         <div class="welcome-card">
+            <div style="text-align: center; margin-bottom: 20px;">
+                <img src="/assets/images/logo.jpg" alt="VMaster Logo" style="max-width: 180px; height: auto; border-radius: 12px; box-shadow: 0 6px 10px rgba(0,0,0,0.15);">
+            </div>
             <div class="vmaster-logo">VMaster</div>
             <p class="tagline">Professional VPN Management System</p>
             

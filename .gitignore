@@ -3,9 +3,9 @@
 .env.local
 .env.production
 
-# Database backups
-*.sql
+# Database backups (but keep migration files)
 backup_*.sql
+!database/*.sql
 
 # Uploads and user-generated content
 uploads/*

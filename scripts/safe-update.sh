@@ -22,8 +22,8 @@ NC='\033[0m'
 DB_USER="root"
 DB_PASS="rootpassword"
 DB_NAME="vpn_cms_portal"
-DB_CONTAINER="vpn_cms_db"
-WEB_CONTAINER="vpn_cms_web"
+DB_CONTAINER="vmaster_db"
+WEB_CONTAINER="vmaster_web"
 
 echo -e "${YELLOW}📋 Pre-Update Checklist${NC}"
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"

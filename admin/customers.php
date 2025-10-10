@@ -24,11 +24,28 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $maxTotalVpn = !empty($_POST['max_total_vpn_accounts']) ? intval($_POST['max_total_vpn_accounts']) : NULL;
         $maxPlanDuration = !empty($_POST['max_plan_duration']) ? intval($_POST['max_plan_duration']) : NULL;
         
+        // Handle customer account expiration
+        $planType = $_POST['account_plan_type'] ?? 'unlimited';
+        $planDuration = null;
+        $expiresAt = null;
+        
+        if ($planType === 'preset' && isset($_POST['account_plan_duration']) && $_POST['account_plan_duration'] !== '') {
+            $planDuration = intval($_POST['account_plan_duration']);
+            $expiresAt = date('Y-m-d H:i:s', strtotime("+{$planDuration} months"));
+        } elseif ($planType === 'custom' && isset($_POST['account_expiry_date']) && $_POST['account_expiry_date'] !== '') {
+            $expiresAt = $_POST['account_expiry_date'] . ' 23:59:59';
+            // Calculate duration in months for display
+            $startDate = new DateTime();
+            $endDate = new DateTime($expiresAt);
+            $interval = $startDate->diff($endDate);
+            $planDuration = ($interval->y * 12) + $interval->m;
+        }
+        
         $hashedPassword = password_hash($password, PASSWORD_DEFAULT);
         
         try {
-            $stmt = $conn->prepare("INSERT INTO customers (username, password, company_name, full_name, email, phone, max_clients, max_vpn_per_client, max_total_vpn_accounts, max_plan_duration, created_by) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
-            $stmt->execute([$username, $hashedPassword, $companyName, $fullName, $email, $phone, $maxClients, $maxVpnPerClient, $maxTotalVpn, $maxPlanDuration, $_SESSION['admin_id']]);
+            $stmt = $conn->prepare("INSERT INTO customers (username, password, company_name, full_name, email, phone, max_clients, max_vpn_per_client, max_total_vpn_accounts, max_plan_duration, plan_duration, expires_at, created_by) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+            $stmt->execute([$username, $hashedPassword, $companyName, $fullName, $email, $phone, $maxClients, $maxVpnPerClient, $maxTotalVpn, $maxPlanDuration, $planDuration, $expiresAt, $_SESSION['admin_id']]);
             
             logActivity($conn, 'admin', $_SESSION['admin_id'], 'add_customer', "Added customer: $companyName");
             $message = 'Customer added successfully!';
@@ -52,6 +69,23 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $maxPlanDuration = !empty($_POST['max_plan_duration']) ? intval($_POST['max_plan_duration']) : NULL;
         $password = $_POST['password'] ?? '';
         
+        // Handle customer account expiration for edit
+        $planType = $_POST['account_plan_type'] ?? 'unlimited';
+        $planDuration = null;
+        $expiresAt = null;
+        
+        if ($planType === 'preset' && isset($_POST['account_plan_duration']) && $_POST['account_plan_duration'] !== '') {
+            $planDuration = intval($_POST['account_plan_duration']);
+            $expiresAt = date('Y-m-d H:i:s', strtotime("+{$planDuration} months"));
+        } elseif ($planType === 'custom' && isset($_POST['account_expiry_date']) && $_POST['account_expiry_date'] !== '') {
+            $expiresAt = $_POST['account_expiry_date'] . ' 23:59:59';
+            // Calculate duration in months for display
+            $startDate = new DateTime();
+            $endDate = new DateTime($expiresAt);
+            $interval = $startDate->diff($endDate);
+            $planDuration = ($interval->y * 12) + $interval->m;
+        }
+        
         try {
             // Check if username is taken by another customer
             $stmt = $conn->prepare("SELECT id FROM customers WHERE username = ? AND id != ?");
@@ -69,11 +103,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             
             if (!empty($password)) {
                 $hashedPassword = password_hash($password, PASSWORD_DEFAULT);
-                $stmt = $conn->prepare("UPDATE customers SET username=?, password=?, company_name=?, full_name=?, email=?, phone=?, status=?, max_clients=?, max_vpn_per_client=?, max_total_vpn_accounts=?, max_plan_duration=? WHERE id=?");
-                $stmt->execute([$username, $hashedPassword, $companyName, $fullName, $email, $phone, $status, $maxClients, $maxVpnPerClient, $maxTotalVpn, $maxPlanDuration, $customerId]);
+                $stmt = $conn->prepare("UPDATE customers SET username=?, password=?, company_name=?, full_name=?, email=?, phone=?, status=?, max_clients=?, max_vpn_per_client=?, max_total_vpn_accounts=?, max_plan_duration=?, plan_duration=?, expires_at=? WHERE id=?");
+                $stmt->execute([$username, $hashedPassword, $companyName, $fullName, $email, $phone, $status, $maxClients, $maxVpnPerClient, $maxTotalVpn, $maxPlanDuration, $planDuration, $expiresAt, $customerId]);
             } else {
-                $stmt = $conn->prepare("UPDATE customers SET username=?, company_name=?, full_name=?, email=?, phone=?, status=?, max_clients=?, max_vpn_per_client=?, max_total_vpn_accounts=?, max_plan_duration=? WHERE id=?");
-                $stmt->execute([$username, $companyName, $fullName, $email, $phone, $status, $maxClients, $maxVpnPerClient, $maxTotalVpn, $maxPlanDuration, $customerId]);
+                $stmt = $conn->prepare("UPDATE customers SET username=?, company_name=?, full_name=?, email=?, phone=?, status=?, max_clients=?, max_vpn_per_client=?, max_total_vpn_accounts=?, max_plan_duration=?, plan_duration=?, expires_at=? WHERE id=?");
+                $stmt->execute([$username, $companyName, $fullName, $email, $phone, $status, $maxClients, $maxVpnPerClient, $maxTotalVpn, $maxPlanDuration, $planDuration, $expiresAt, $customerId]);
             }
             
             logActivity($conn, 'admin', $_SESSION['admin_id'], 'edit_customer', "Updated customer: $companyName (Status: $status)");
@@ -262,7 +296,7 @@ $pageTitle = 'Customers - ' . SITE_NAME;
                 </div>
                 
                 <div class="form-group">
-                    <label for="max_plan_duration">Max Plan Duration (Months)</label>
+                    <label for="max_plan_duration">Max VPN Plan Duration (Months)</label>
                     <select name="max_plan_duration">
                         <option value="">Unlimited Duration</option>
                         <option value="1">1 Month Max</option>
@@ -273,7 +307,50 @@ $pageTitle = 'Customers - ' . SITE_NAME;
                         <option value="24">2 Years Max</option>
                         <option value="36">3 Years Max</option>
                     </select>
-                    <small style="color: #64748b;">Maximum VPN plan duration this customer can create. Unlimited = customer can create any duration they want</small>
+                    <small style="color: #64748b;">Maximum VPN plan duration this customer can create</small>
+                </div>
+                
+                <hr style="margin: 20px 0; border: none; border-top: 1px solid #e5e7eb;">
+                
+                <div class="form-group">
+                    <label for="account_plan_type">Customer Account Expiration</label>
+                    <select name="account_plan_type" id="account_plan_type" onchange="toggleAccountExpiry(this)">
+                        <option value="unlimited">Never Expires (Lifetime)</option>
+                        <option value="preset">Preset Plan Duration</option>
+                        <option value="custom">Custom Expiry Date</option>
+                    </select>
+                    <small style="color: #64748b;">Set when this customer account expires</small>
+                </div>
+                
+                <!-- Preset Plans -->
+                <div id="accountPresetPlans" style="display: none;">
+                    <div class="form-group">
+                        <label for="account_plan_duration">Account Duration</label>
+                        <select name="account_plan_duration" id="account_plan_duration" onchange="updateAccountExpiry(this)">
+                            <option value="">-- Choose Duration --</option>
+                            <option value="1">1 Month</option>
+                            <option value="2">2 Months</option>
+                            <option value="3">3 Months</option>
+                            <option value="6">6 Months</option>
+                            <option value="12">1 Year</option>
+                            <option value="24">2 Years</option>
+                            <option value="36">3 Years</option>
+                        </select>
+                        <div id="accountExpiryInfo" style="display: none; margin-top: 10px; padding: 10px; background: #fef3c7; border-left: 3px solid #f59e0b; border-radius: 4px;">
+                            <strong>📅 Account Expires:</strong> <span id="accountExpiryDate"></span>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Custom Date -->
+                <div id="accountCustomExpiry" style="display: none;">
+                    <div class="form-group">
+                        <label for="account_expiry_date">Expiry Date *</label>
+                        <input type="date" name="account_expiry_date" id="account_expiry_date" onchange="showCustomExpiryInfo()">
+                        <div id="customExpiryInfo" style="display: none; margin-top: 10px; padding: 10px; background: #fee2e2; border-left: 3px solid #ef4444; border-radius: 4px;">
+                            <strong>📅 Account Expires:</strong> <span id="customExpiryDisplay"></span>
+                        </div>
+                    </div>
                 </div>
                 
                 <button type="submit" class="btn btn-primary btn-block">Add Customer</button>
@@ -351,7 +428,7 @@ $pageTitle = 'Customers - ' . SITE_NAME;
                 </div>
                 
                 <div class="form-group">
-                    <label for="edit_max_plan_duration">Max Plan Duration (Months)</label>
+                    <label for="edit_max_plan_duration">Max VPN Plan Duration (Months)</label>
                     <select name="max_plan_duration" id="edit_max_plan_duration">
                         <option value="">Unlimited Duration</option>
                         <option value="1">1 Month Max</option>
@@ -364,6 +441,49 @@ $pageTitle = 'Customers - ' . SITE_NAME;
                     </select>
                     <small style="color: #64748b;">Maximum VPN plan duration this customer can create</small>
                 </div>
+                
+                <hr style="margin: 20px 0; border: none; border-top: 1px solid #e5e7eb;">
+                
+                <div class="form-group">
+                    <label for="edit_account_plan_type">Customer Account Expiration</label>
+                    <select name="account_plan_type" id="edit_account_plan_type" onchange="toggleEditAccountExpiry(this)">
+                        <option value="unlimited">Never Expires (Lifetime)</option>
+                        <option value="preset">Preset Plan Duration</option>
+                        <option value="custom">Custom Expiry Date</option>
+                    </select>
+                    <small style="color: #64748b;">Set when this customer account expires</small>
+                </div>
+                
+                <!-- Preset Plans -->
+                <div id="editAccountPresetPlans" style="display: none;">
+                    <div class="form-group">
+                        <label for="edit_account_plan_duration">Account Duration</label>
+                        <select name="account_plan_duration" id="edit_account_plan_duration" onchange="updateEditAccountExpiry(this)">
+                            <option value="">-- Choose Duration --</option>
+                            <option value="1">1 Month</option>
+                            <option value="2">2 Months</option>
+                            <option value="3">3 Months</option>
+                            <option value="6">6 Months</option>
+                            <option value="12">1 Year</option>
+                            <option value="24">2 Years</option>
+                            <option value="36">3 Years</option>
+                        </select>
+                        <div id="editAccountExpiryInfo" style="display: none; margin-top: 10px; padding: 10px; background: #fef3c7; border-left: 3px solid #f59e0b; border-radius: 4px;">
+                            <strong>📅 Account Expires:</strong> <span id="editAccountExpiryDate"></span>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Custom Date -->
+                <div id="editAccountCustomExpiry" style="display: none;">
+                    <div class="form-group">
+                        <label for="edit_account_expiry_date">Expiry Date *</label>
+                        <input type="date" name="account_expiry_date" id="edit_account_expiry_date" onchange="showEditCustomExpiryInfo()">
+                        <div id="editCustomExpiryInfo" style="display: none; margin-top: 10px; padding: 10px; background: #fee2e2; border-left: 3px solid #ef4444; border-radius: 4px;">
+                            <strong>📅 Account Expires:</strong> <span id="editCustomExpiryDisplay"></span>
+                        </div>
+                    </div>
+                </div>
                 </div>
                 
                 <button type="submit" class="btn btn-primary btn-block">Update Customer</button>
@@ -373,6 +493,80 @@ $pageTitle = 'Customers - ' . SITE_NAME;
     
     <script src="/assets/js/main.js"></script>
     <script>
+    // Add Customer - Toggle account expiry options
+    function toggleAccountExpiry(select) {
+        const planType = select.value;
+        document.getElementById('accountPresetPlans').style.display = planType === 'preset' ? 'block' : 'none';
+        document.getElementById('accountCustomExpiry').style.display = planType === 'custom' ? 'block' : 'none';
+        
+        if (planType === 'custom') {
+            const today = new Date().toISOString().split('T')[0];
+            document.getElementById('account_expiry_date').setAttribute('min', today);
+        }
+    }
+    
+    function updateAccountExpiry(select) {
+        const months = parseInt(select.value);
+        if (months > 0) {
+            const expiry = new Date();
+            expiry.setMonth(expiry.getMonth() + months);
+            const options = { year: 'numeric', month: 'long', day: 'numeric' };
+            document.getElementById('accountExpiryDate').textContent = expiry.toLocaleDateString('en-US', options);
+            document.getElementById('accountExpiryInfo').style.display = 'block';
+        } else {
+            document.getElementById('accountExpiryInfo').style.display = 'none';
+        }
+    }
+    
+    function showCustomExpiryInfo() {
+        const date = document.getElementById('account_expiry_date').value;
+        if (date) {
+            const expiry = new Date(date);
+            const options = { year: 'numeric', month: 'long', day: 'numeric' };
+            document.getElementById('customExpiryDisplay').textContent = expiry.toLocaleDateString('en-US', options);
+            document.getElementById('customExpiryInfo').style.display = 'block';
+        } else {
+            document.getElementById('customExpiryInfo').style.display = 'none';
+        }
+    }
+    
+    // Edit Customer - Toggle account expiry options
+    function toggleEditAccountExpiry(select) {
+        const planType = select.value;
+        document.getElementById('editAccountPresetPlans').style.display = planType === 'preset' ? 'block' : 'none';
+        document.getElementById('editAccountCustomExpiry').style.display = planType === 'custom' ? 'block' : 'none';
+        
+        if (planType === 'custom') {
+            const today = new Date().toISOString().split('T')[0];
+            document.getElementById('edit_account_expiry_date').setAttribute('min', today);
+        }
+    }
+    
+    function updateEditAccountExpiry(select) {
+        const months = parseInt(select.value);
+        if (months > 0) {
+            const expiry = new Date();
+            expiry.setMonth(expiry.getMonth() + months);
+            const options = { year: 'numeric', month: 'long', day: 'numeric' };
+            document.getElementById('editAccountExpiryDate').textContent = expiry.toLocaleDateString('en-US', options);
+            document.getElementById('editAccountExpiryInfo').style.display = 'block';
+        } else {
+            document.getElementById('editAccountExpiryInfo').style.display = 'none';
+        }
+    }
+    
+    function showEditCustomExpiryInfo() {
+        const date = document.getElementById('edit_account_expiry_date').value;
+        if (date) {
+            const expiry = new Date(date);
+            const options = { year: 'numeric', month: 'long', day: 'numeric' };
+            document.getElementById('editCustomExpiryDisplay').textContent = expiry.toLocaleDateString('en-US', options);
+            document.getElementById('editCustomExpiryInfo').style.display = 'block';
+        } else {
+            document.getElementById('editCustomExpiryInfo').style.display = 'none';
+        }
+    }
+    
     function editCustomer(customer) {
         document.getElementById('edit_customer_id').value = customer.id;
         document.getElementById('edit_company_name').value = customer.company_name;
@@ -385,6 +579,26 @@ $pageTitle = 'Customers - ' . SITE_NAME;
         document.getElementById('edit_max_vpn_per_client').value = customer.max_vpn_per_client || '';
         document.getElementById('edit_max_total_vpn_accounts').value = customer.max_total_vpn_accounts || '';
         document.getElementById('edit_max_plan_duration').value = customer.max_plan_duration || '';
+        
+        // Set account expiration fields
+        if (customer.expires_at) {
+            if (customer.plan_duration) {
+                document.getElementById('edit_account_plan_type').value = 'preset';
+                document.getElementById('edit_account_plan_duration').value = customer.plan_duration;
+                toggleEditAccountExpiry(document.getElementById('edit_account_plan_type'));
+                updateEditAccountExpiry(document.getElementById('edit_account_plan_duration'));
+            } else {
+                document.getElementById('edit_account_plan_type').value = 'custom';
+                const expiryDate = customer.expires_at.split(' ')[0];
+                document.getElementById('edit_account_expiry_date').value = expiryDate;
+                toggleEditAccountExpiry(document.getElementById('edit_account_plan_type'));
+                showEditCustomExpiryInfo();
+            }
+        } else {
+            document.getElementById('edit_account_plan_type').value = 'unlimited';
+            toggleEditAccountExpiry(document.getElementById('edit_account_plan_type'));
+        }
+        
         openModal('editCustomerModal');
     }
     </script>

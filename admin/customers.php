@@ -22,12 +22,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $maxClients = !empty($_POST['max_clients']) ? intval($_POST['max_clients']) : NULL;
         $maxVpnPerClient = !empty($_POST['max_vpn_per_client']) ? intval($_POST['max_vpn_per_client']) : NULL;
         $maxTotalVpn = !empty($_POST['max_total_vpn_accounts']) ? intval($_POST['max_total_vpn_accounts']) : NULL;
+        $maxPlanDuration = !empty($_POST['max_plan_duration']) ? intval($_POST['max_plan_duration']) : NULL;
         
         $hashedPassword = password_hash($password, PASSWORD_DEFAULT);
         
         try {
-            $stmt = $conn->prepare("INSERT INTO customers (username, password, company_name, full_name, email, phone, max_clients, max_vpn_per_client, max_total_vpn_accounts, created_by) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
-            $stmt->execute([$username, $hashedPassword, $companyName, $fullName, $email, $phone, $maxClients, $maxVpnPerClient, $maxTotalVpn, $_SESSION['admin_id']]);
+            $stmt = $conn->prepare("INSERT INTO customers (username, password, company_name, full_name, email, phone, max_clients, max_vpn_per_client, max_total_vpn_accounts, max_plan_duration, created_by) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+            $stmt->execute([$username, $hashedPassword, $companyName, $fullName, $email, $phone, $maxClients, $maxVpnPerClient, $maxTotalVpn, $maxPlanDuration, $_SESSION['admin_id']]);
             
             logActivity($conn, 'admin', $_SESSION['admin_id'], 'add_customer', "Added customer: $companyName");
             $message = 'Customer added successfully!';
@@ -48,6 +49,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $maxClients = !empty($_POST['max_clients']) ? intval($_POST['max_clients']) : NULL;
         $maxVpnPerClient = !empty($_POST['max_vpn_per_client']) ? intval($_POST['max_vpn_per_client']) : NULL;
         $maxTotalVpn = !empty($_POST['max_total_vpn_accounts']) ? intval($_POST['max_total_vpn_accounts']) : NULL;
+        $maxPlanDuration = !empty($_POST['max_plan_duration']) ? intval($_POST['max_plan_duration']) : NULL;
         $password = $_POST['password'] ?? '';
         
         try {
@@ -67,11 +69,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             
             if (!empty($password)) {
                 $hashedPassword = password_hash($password, PASSWORD_DEFAULT);
-                $stmt = $conn->prepare("UPDATE customers SET username=?, password=?, company_name=?, full_name=?, email=?, phone=?, status=?, max_clients=?, max_vpn_per_client=?, max_total_vpn_accounts=? WHERE id=?");
-                $stmt->execute([$username, $hashedPassword, $companyName, $fullName, $email, $phone, $status, $maxClients, $maxVpnPerClient, $maxTotalVpn, $customerId]);
+                $stmt = $conn->prepare("UPDATE customers SET username=?, password=?, company_name=?, full_name=?, email=?, phone=?, status=?, max_clients=?, max_vpn_per_client=?, max_total_vpn_accounts=?, max_plan_duration=? WHERE id=?");
+                $stmt->execute([$username, $hashedPassword, $companyName, $fullName, $email, $phone, $status, $maxClients, $maxVpnPerClient, $maxTotalVpn, $maxPlanDuration, $customerId]);
             } else {
-                $stmt = $conn->prepare("UPDATE customers SET username=?, company_name=?, full_name=?, email=?, phone=?, status=?, max_clients=?, max_vpn_per_client=?, max_total_vpn_accounts=? WHERE id=?");
-                $stmt->execute([$username, $companyName, $fullName, $email, $phone, $status, $maxClients, $maxVpnPerClient, $maxTotalVpn, $customerId]);
+                $stmt = $conn->prepare("UPDATE customers SET username=?, company_name=?, full_name=?, email=?, phone=?, status=?, max_clients=?, max_vpn_per_client=?, max_total_vpn_accounts=?, max_plan_duration=? WHERE id=?");
+                $stmt->execute([$username, $companyName, $fullName, $email, $phone, $status, $maxClients, $maxVpnPerClient, $maxTotalVpn, $maxPlanDuration, $customerId]);
             }
             
             logActivity($conn, 'admin', $_SESSION['admin_id'], 'edit_customer', "Updated customer: $companyName (Status: $status)");
@@ -259,6 +261,21 @@ $pageTitle = 'Customers - ' . SITE_NAME;
                     <small style="color: #64748b;">Total VPN accounts this customer can create (across all clients)</small>
                 </div>
                 
+                <div class="form-group">
+                    <label for="max_plan_duration">Max Plan Duration (Months)</label>
+                    <select name="max_plan_duration">
+                        <option value="">Unlimited Duration</option>
+                        <option value="1">1 Month Max</option>
+                        <option value="2">2 Months Max</option>
+                        <option value="3">3 Months Max</option>
+                        <option value="6">6 Months Max</option>
+                        <option value="12">1 Year Max</option>
+                        <option value="24">2 Years Max</option>
+                        <option value="36">3 Years Max</option>
+                    </select>
+                    <small style="color: #64748b;">Maximum VPN plan duration this customer can create. Unlimited = customer can create any duration they want</small>
+                </div>
+                
                 <button type="submit" class="btn btn-primary btn-block">Add Customer</button>
             </form>
         </div>
@@ -332,6 +349,21 @@ $pageTitle = 'Customers - ' . SITE_NAME;
                     <input type="number" name="max_total_vpn_accounts" id="edit_max_total_vpn_accounts" min="1" placeholder="Empty = unlimited">
                     <small style="color: #64748b;">Total VPN limit for this customer</small>
                 </div>
+                
+                <div class="form-group">
+                    <label for="edit_max_plan_duration">Max Plan Duration (Months)</label>
+                    <select name="max_plan_duration" id="edit_max_plan_duration">
+                        <option value="">Unlimited Duration</option>
+                        <option value="1">1 Month Max</option>
+                        <option value="2">2 Months Max</option>
+                        <option value="3">3 Months Max</option>
+                        <option value="6">6 Months Max</option>
+                        <option value="12">1 Year Max</option>
+                        <option value="24">2 Years Max</option>
+                        <option value="36">3 Years Max</option>
+                    </select>
+                    <small style="color: #64748b;">Maximum VPN plan duration this customer can create</small>
+                </div>
                 </div>
                 
                 <button type="submit" class="btn btn-primary btn-block">Update Customer</button>
@@ -352,6 +384,7 @@ $pageTitle = 'Customers - ' . SITE_NAME;
         document.getElementById('edit_max_clients').value = customer.max_clients || '';
         document.getElementById('edit_max_vpn_per_client').value = customer.max_vpn_per_client || '';
         document.getElementById('edit_max_total_vpn_accounts').value = customer.max_total_vpn_accounts || '';
+        document.getElementById('edit_max_plan_duration').value = customer.max_plan_duration || '';
         openModal('editCustomerModal');
     }
     </script>

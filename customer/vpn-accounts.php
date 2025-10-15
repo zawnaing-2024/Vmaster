@@ -1,4 +1,5 @@
 <?php
+require_once __DIR__ . '/../includes/language.php';
 require_once __DIR__ . '/../config/config.php';
 require_once __DIR__ . '/../config/radius.php';
 require_once __DIR__ . '/../includes/vpn_handler.php';
@@ -169,10 +170,10 @@ $clientList = $stmt->fetchAll();
 $stmt = $conn->query("SELECT * FROM vpn_servers WHERE status = 'active' ORDER BY server_name");
 $servers = $stmt->fetchAll();
 
-$pageTitle = 'VPN Accounts - ' . SITE_NAME;
+$pageTitle = t('vpn_accounts', 'customer') . ' - ' . SITE_NAME;
 ?>
 <!DOCTYPE html>
-<html lang="en">
+<html lang="<?php echo getCurrentLanguage(); ?>">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">

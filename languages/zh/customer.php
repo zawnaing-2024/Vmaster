@@ -126,5 +126,18 @@ return [
     'all_vpn_accounts' => '所有VPN账户',
     'staff_name' => '员工姓名',
     'server' => '服务器',
+    
+    // Change Password Page
+    'update_your_password' => '更新您的密码',
+    'current_password' => '当前密码',
+    'new_password' => '新密码',
+    'confirm_new_password' => '确认新密码',
+    'min_6_characters' => '最少6个字符',
+    'password_requirements' => '密码要求',
+    'minimum_6_characters' => '最少6个字符',
+    'use_strong_password' => '使用强而独特的密码',
+    'avoid_common_words' => '避免使用常见词汇或模式',
+    'current_password_incorrect' => '当前密码不正确。',
+    'password_change_failed' => '修改密码失败，请重试。',
 ];
 

@@ -126,5 +126,18 @@ return [
     'all_vpn_accounts' => 'All VPN Accounts',
     'staff_name' => 'Staff Name',
     'server' => 'Server',
+    
+    // Change Password Page
+    'update_your_password' => 'Update Your Password',
+    'current_password' => 'Current Password',
+    'new_password' => 'New Password',
+    'confirm_new_password' => 'Confirm New Password',
+    'min_6_characters' => 'min 6 characters',
+    'password_requirements' => 'Password Requirements',
+    'minimum_6_characters' => 'Minimum 6 characters',
+    'use_strong_password' => 'Use a strong, unique password',
+    'avoid_common_words' => 'Avoid common words or patterns',
+    'current_password_incorrect' => 'Current password is incorrect.',
+    'password_change_failed' => 'Failed to change password. Please try again.',
 ];
 

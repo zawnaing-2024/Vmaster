@@ -37,24 +37,24 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $stmt->execute([$hashedPassword, $_SESSION['customer_id']]);
                 
                 logActivity($conn, 'customer', $_SESSION['customer_id'], 'change_password', 'Admin changed password');
-                $message = 'Password changed successfully!';
+                $message = t('password_changed', 'customer');
                 $messageType = 'success';
             } else {
-                $message = 'Current password is incorrect.';
+                $message = t('current_password_incorrect', 'customer');
                 $messageType = 'error';
             }
         } catch(Exception $e) {
-            $message = 'Failed to change password. Please try again.';
+            $message = t('password_change_failed', 'customer');
             $messageType = 'error';
             error_log($e->getMessage());
         }
     }
 }
 
-$pageTitle = 'Change Password - ' . SITE_NAME;
+$pageTitle = t('change_password', 'customer') . ' - ' . SITE_NAME;
 ?>
 <!DOCTYPE html>
-<html lang="en">
+<html lang="<?php echo getCurrentLanguage(); ?>">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -73,7 +73,7 @@ $pageTitle = 'Change Password - ' . SITE_NAME;
                         <span></span>
                         <span></span>
                     </div>
-                    <h1 class="page-title">Change Password</h1>
+                    <h1 class="page-title"><?php echo t('change_password', 'customer'); ?></h1>
                 </div>
             </div>
             
@@ -85,34 +85,34 @@ $pageTitle = 'Change Password - ' . SITE_NAME;
             
             <div class="card" style="max-width: 600px;">
                 <div class="card-header">
-                    <h2 class="card-title">🔐 Update Your Password</h2>
+                    <h2 class="card-title">🔐 <?php echo t('update_your_password', 'customer'); ?></h2>
                 </div>
                 <form method="POST" action="">
                     <div class="form-group">
-                        <label for="current_password">Current Password *</label>
+                        <label for="current_password"><?php echo t('current_password', 'customer'); ?> *</label>
                         <input type="password" name="current_password" id="current_password" required autofocus>
                     </div>
                     
                     <div class="form-group">
-                        <label for="new_password">New Password * (min 6 characters)</label>
+                        <label for="new_password"><?php echo t('new_password', 'customer'); ?> * (<?php echo t('min_6_characters', 'customer'); ?>)</label>
                         <input type="password" name="new_password" id="new_password" required minlength="6">
                     </div>
                     
                     <div class="form-group">
-                        <label for="confirm_password">Confirm New Password *</label>
+                        <label for="confirm_password"><?php echo t('confirm_new_password', 'customer'); ?> *</label>
                         <input type="password" name="confirm_password" id="confirm_password" required minlength="6">
                     </div>
                     
                     <div class="alert alert-info">
-                        <strong>Password Requirements:</strong>
+                        <strong><?php echo t('password_requirements', 'customer'); ?>:</strong>
                         <ul style="margin: 10px 0 0 20px;">
-                            <li>Minimum 6 characters</li>
-                            <li>Use a strong, unique password</li>
-                            <li>Avoid common words or patterns</li>
+                            <li><?php echo t('minimum_6_characters', 'customer'); ?></li>
+                            <li><?php echo t('use_strong_password', 'customer'); ?></li>
+                            <li><?php echo t('avoid_common_words', 'customer'); ?></li>
                         </ul>
                     </div>
                     
-                    <button type="submit" class="btn btn-primary btn-block">Change Password</button>
+                    <button type="submit" class="btn btn-primary btn-block"><?php echo t('change_password', 'customer'); ?></button>
                 </form>
             </div>
         </div>

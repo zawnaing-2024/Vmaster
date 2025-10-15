@@ -1,0 +1,111 @@
+<?php
+return [
+    'dashboard' => '控制面板',
+    'my_vpn_accounts' => '我的VPN账户',
+    'my_clients' => '我的客户',
+    'my_staff' => '我的员工',
+    'change_password' => '修改密码',
+    'profile' => '个人资料',
+    
+    // Dashboard
+    'total_vpn_accounts' => 'VPN账户总数',
+    'active_connections' => '活跃连接',
+    'total_clients' => '客户总数',
+    'total_staff' => '员工总数',
+    'quick_stats' => '快速统计',
+    'recent_activity' => '最近活动',
+    
+    // VPN Accounts
+    'vpn_accounts' => 'VPN账户',
+    'create_vpn_account' => '创建VPN账户',
+    'vpn_account_details' => 'VPN账户详情',
+    'server' => '服务器',
+    'server_name' => '服务器名称',
+    'server_type' => '服务器类型',
+    'client' => '客户',
+    'client_name' => '客户名称',
+    'select_client' => '选择客户',
+    'select_server' => '选择服务器',
+    'connection_status' => '连接状态',
+    'created_date' => '创建日期',
+    'view_credentials' => '查看凭证',
+    'toggle_status' => '切换状态',
+    'delete_account' => '删除账户',
+    'connected' => '已连接',
+    'disconnected' => '已断开',
+    'online' => '在线',
+    'offline' => '离线',
+    
+    // Plan Duration
+    'plan_type' => '套餐类型',
+    'plan_duration' => '套餐时长',
+    'expiration_date' => '到期日期',
+    'expires_in' => '到期时间',
+    'expired' => '已过期',
+    'never_expires' => '永不过期',
+    'unlimited' => '无限期',
+    'preset_plans' => '预设套餐',
+    'custom_date_range' => '自定义日期',
+    'select_plan' => '选择套餐',
+    'start_date' => '开始日期',
+    'end_date' => '结束日期',
+    'days_left' => '天后到期',
+    '1_month' => '1个月',
+    '3_months' => '3个月',
+    '6_months' => '6个月',
+    '12_months' => '12个月',
+    '24_months' => '24个月',
+    '36_months' => '36个月',
+    
+    // Clients
+    'clients' => '客户',
+    'add_client' => '添加客户',
+    'edit_client' => '编辑客户',
+    'client_details' => '客户详情',
+    'full_name' => '全名',
+    'contact_info' => '联系信息',
+    'vpn_count' => 'VPN账户数',
+    
+    // Staff
+    'staff' => '员工',
+    'add_staff' => '添加员工',
+    'edit_staff' => '编辑员工',
+    'staff_details' => '员工详情',
+    'role' => '角色',
+    'permissions' => '权限',
+    'last_login' => '上次登录',
+    
+    // Messages
+    'account_created' => 'VPN账户创建成功',
+    'account_updated' => 'VPN账户更新成功',
+    'account_deleted' => 'VPN账户删除成功',
+    'status_updated' => '状态更新成功',
+    'client_added' => '客户添加成功',
+    'client_updated' => '客户更新成功',
+    'client_deleted' => '客户删除成功',
+    'staff_added' => '员工添加成功',
+    'staff_updated' => '员工更新成功',
+    'staff_deleted' => '员工删除成功',
+    'password_changed' => '密码修改成功',
+    'error_occurred' => '发生错误，请重试',
+    'invalid_credentials' => '用户名或密码错误',
+    'session_expired' => '会话已过期，请重新登录',
+    
+    // Login
+    'customer_login' => '客户登录',
+    'remember_me' => '记住我',
+    'forgot_password' => '忘记密码？',
+    'login_to_continue' => '登录以继续',
+    
+    // Credentials
+    'credentials' => '凭证',
+    'connection_details' => '连接详情',
+    'qr_code' => '二维码',
+    'access_url' => '访问链接',
+    'config_file' => '配置文件',
+    'copy_credentials' => '复制凭证',
+    'download_config' => '下载配置',
+    'scan_qr' => '扫描二维码',
+];
+?>
+

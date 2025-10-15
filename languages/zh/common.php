@@ -59,5 +59,7 @@ return [
     'reset' => '重置',
     'clear' => '清除',
     'apply' => '应用',
+    'unlimited' => '无限制',
+    'name' => '姓名',
 ];
 

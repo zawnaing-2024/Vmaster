@@ -116,5 +116,10 @@ return [
     'contact_person' => 'Contact Person',
     'max_client_accounts' => 'Max Client Accounts',
     'account_status' => 'Account Status',
+    
+    // Clients Page
+    'client_members' => 'Client Members',
+    'department' => 'Department',
+    'name' => 'Name',
 ];
 

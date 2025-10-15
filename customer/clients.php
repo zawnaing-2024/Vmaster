@@ -277,10 +277,10 @@ $stmt = $conn->prepare("SELECT s.*,
 $stmt->execute([$_SESSION['customer_id']]);
 $client = $stmt->fetchAll();
 
-$pageTitle = 'My Client - ' . SITE_NAME;
+$pageTitle = t('my_clients', 'customer') . ' - ' . SITE_NAME;
 ?>
 <!DOCTYPE html>
-<html lang="en">
+<html lang="<?php echo getCurrentLanguage(); ?>">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -299,9 +299,9 @@ $pageTitle = 'My Client - ' . SITE_NAME;
                         <span></span>
                         <span></span>
                     </div>
-                    <h1 class="page-title">My Client</h1>
+                    <h1 class="page-title"><?php echo t('my_clients', 'customer'); ?></h1>
                 </div>
-                <button class="btn btn-primary" onclick="openModal('addClientModal')">+ Add Client</button>
+                <button class="btn btn-primary" onclick="openModal('addClientModal')">+ <?php echo t('add_client', 'customer'); ?></button>
             </div>
             
             <?php if ($message): ?>
@@ -312,19 +312,19 @@ $pageTitle = 'My Client - ' . SITE_NAME;
             
             <div class="card">
                 <div class="card-header">
-                    <h2 class="card-title">Client Members (<?php echo count($client); ?><?php echo $customer['max_clients'] !== null ? ' / ' . $customer['max_clients'] : ' / unlimited'; ?>)</h2>
+                    <h2 class="card-title"><?php echo t('client_members', 'customer'); ?> (<?php echo count($client); ?><?php echo $customer['max_clients'] !== null ? ' / ' . $customer['max_clients'] : ' / ' . t('unlimited', 'common'); ?>)</h2>
                 </div>
                 <div class="table-container">
                     <table>
                         <thead>
                             <tr>
-                                <th>Name</th>
-                                <th>Email</th>
-                                <th>Phone</th>
-                                <th>Department</th>
-                                <th>VPN Accounts</th>
-                                <th>Status</th>
-                                <th>Actions</th>
+                                <th><?php echo t('name', 'common'); ?></th>
+                                <th><?php echo t('email', 'common'); ?></th>
+                                <th><?php echo t('phone', 'common'); ?></th>
+                                <th><?php echo t('department', 'customer'); ?></th>
+                                <th><?php echo t('vpn_accounts', 'customer'); ?></th>
+                                <th><?php echo t('status', 'common'); ?></th>
+                                <th><?php echo t('actions', 'common'); ?></th>
                             </tr>
                         </thead>
                         <tbody>

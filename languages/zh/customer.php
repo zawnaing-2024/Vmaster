@@ -116,5 +116,10 @@ return [
     'contact_person' => '联系人',
     'max_client_accounts' => '最大客户账户数',
     'account_status' => '账户状态',
+    
+    // Clients Page
+    'client_members' => '客户成员',
+    'department' => '部门',
+    'name' => '姓名',
 ];
 

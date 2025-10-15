@@ -59,5 +59,7 @@ return [
     'reset' => 'Reset',
     'clear' => 'Clear',
     'apply' => 'Apply',
+    'unlimited' => 'Unlimited',
+    'name' => 'Name',
 ];
 

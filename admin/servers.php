@@ -473,4 +473,3 @@ $pageTitle = 'VPN Servers - ' . SITE_NAME;
     </script>
 </body>
 </html>
-

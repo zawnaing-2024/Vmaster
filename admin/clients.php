@@ -97,4 +97,3 @@ $pageTitle = 'Client Accounts - ' . SITE_NAME;
     <script src="/assets/js/main.js"></script>
 </body>
 </html>
-

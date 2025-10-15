@@ -152,5 +152,19 @@ return [
     'choose_server' => '选择服务器',
     'need_to_add_clients_first' => '在创建VPN账户之前，您需要先添加客户端。',
     'go_to_client_management' => '前往客户端管理',
+    
+    // Client Management Forms
+    'add_client_member' => '添加客户端成员',
+    'edit_client_member' => '编辑客户端成员',
+    'client_name' => '客户端姓名',
+    'department_placeholder' => '例如：IT、销售、市场',
+    'notes' => '备注',
+    'max_vpn_accounts_for_client' => '此客户端的最大VPN账户数',
+    'leave_empty_for_default' => '留空使用默认值',
+    'custom_limit_for_client' => '仅为此客户端自定义限制。',
+    'leave_empty_for_company_default' => '留空使用公司默认值',
+    'update_client' => '更新客户端',
+    'confirm_delete_client' => '您确定要删除此客户端成员吗？',
+    'no_client_members_yet' => '暂无客户端成员。点击"添加客户端"开始。',
 ];
 

@@ -152,5 +152,19 @@ return [
     'choose_server' => 'Choose Server',
     'need_to_add_clients_first' => 'You need to add clients first before creating VPN accounts.',
     'go_to_client_management' => 'Go to Client Management',
+    
+    // Client Management Forms
+    'add_client_member' => 'Add Client Member',
+    'edit_client_member' => 'Edit Client Member',
+    'client_name' => 'Client Name',
+    'department_placeholder' => 'e.g., IT, Sales, Marketing',
+    'notes' => 'Notes',
+    'max_vpn_accounts_for_client' => 'Max VPN Accounts for This Client',
+    'leave_empty_for_default' => 'Leave empty to use default',
+    'custom_limit_for_client' => 'Custom limit for this client only.',
+    'leave_empty_for_company_default' => 'Leave empty to use company default',
+    'update_client' => 'Update Client',
+    'confirm_delete_client' => 'Are you sure you want to delete this client member?',
+    'no_client_members_yet' => 'No client members yet. Click "Add Client" to get started.',
 ];
 

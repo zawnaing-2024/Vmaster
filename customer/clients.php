@@ -347,8 +347,8 @@ $pageTitle = t('my_clients', 'customer') . ' - ' . SITE_NAME;
                                             </span>
                                         </td>
                                         <td class="action-buttons">
-                                            <button class="btn btn-small btn-secondary" onclick='editClient(<?php echo json_encode($member); ?>)'>Edit</button>
-                                            <a href="?delete=<?php echo $member['id']; ?>" class="btn btn-small btn-danger" onclick="return confirmDelete('Are you sure you want to delete this client member?')">Delete</a>
+                                            <button class="btn btn-small btn-secondary" onclick='editClient(<?php echo json_encode($member); ?>)'><?php echo t('edit', 'common'); ?></button>
+                                            <a href="?delete=<?php echo $member['id']; ?>" class="btn btn-small btn-danger" onclick="return confirmDelete('<?php echo t('confirm_delete_client', 'customer'); ?>')"><?php echo t('delete', 'common'); ?></a>
                                         </td>
                                     </tr>
                                 <?php endforeach; ?>
@@ -356,7 +356,7 @@ $pageTitle = t('my_clients', 'customer') . ' - ' . SITE_NAME;
                                 <tr>
                                     <td colspan="7" class="empty-state">
                                         <div class="empty-state-icon">👤</div>
-                                        <p>No client members yet. Click "Add Client" to get started.</p>
+                                        <p><?php echo t('no_client_members_yet', 'customer'); ?></p>
                                     </td>
                                 </tr>
                             <?php endif; ?>
@@ -371,47 +371,47 @@ $pageTitle = t('my_clients', 'customer') . ' - ' . SITE_NAME;
     <div id="addClientModal" class="modal">
         <div class="modal-content">
             <div class="modal-header">
-                <h2>Add Client Member</h2>
+                <h2><?php echo t('add_client_member', 'customer'); ?></h2>
                 <span class="modal-close" onclick="closeModal('addClientModal')">&times;</span>
             </div>
             <form method="POST" action="">
                 <input type="hidden" name="action" value="add">
                 
                 <div class="form-group">
-                    <label for="client_name">Client Name *</label>
+                    <label for="client_name"><?php echo t('client_name', 'customer'); ?> *</label>
                     <input type="text" name="client_name" required>
                 </div>
                 
                 <div class="form-row">
                     <div class="form-group">
-                        <label for="client_email">Email</label>
+                        <label for="client_email"><?php echo t('email', 'common'); ?></label>
                         <input type="email" name="client_email">
                     </div>
                     <div class="form-group">
-                        <label for="client_phone">Phone</label>
+                        <label for="client_phone"><?php echo t('phone', 'common'); ?></label>
                         <input type="text" name="client_phone">
                     </div>
                 </div>
                 
                 <div class="form-group">
-                    <label for="department">Department</label>
-                    <input type="text" name="department" placeholder="e.g., IT, Sales, Marketing">
+                    <label for="department"><?php echo t('department', 'customer'); ?></label>
+                    <input type="text" name="department" placeholder="<?php echo t('department_placeholder', 'customer'); ?>">
                 </div>
                 
                 <div class="form-group">
-                    <label for="notes">Notes</label>
+                    <label for="notes"><?php echo t('notes', 'customer'); ?></label>
                     <textarea name="notes" rows="3"></textarea>
                 </div>
                 
                 <div class="form-group">
-                    <label for="max_vpn_accounts">Max VPN Accounts for This Client</label>
-                    <input type="number" name="max_vpn_accounts" min="1" max="100" placeholder="Leave empty to use default (<?php echo $customer['max_vpn_per_client'] ?? 'unlimited'; ?>)">
+                    <label for="max_vpn_accounts"><?php echo t('max_vpn_accounts_for_client', 'customer'); ?></label>
+                    <input type="number" name="max_vpn_accounts" min="1" max="100" placeholder="<?php echo t('leave_empty_for_default', 'customer'); ?> (<?php echo $customer['max_vpn_per_client'] ?? t('unlimited', 'common'); ?>)">
                     <small style="color: #64748b; margin-top: 5px; display: block;">
-                        Custom limit for this client only. Leave empty to use company default: <?php echo $customer['max_vpn_per_client'] ?? 'unlimited'; ?> VPN accounts
+                        <?php echo t('custom_limit_for_client', 'customer'); ?> <?php echo t('leave_empty_for_company_default', 'customer'); ?>: <?php echo $customer['max_vpn_per_client'] ?? t('unlimited', 'common'); ?> <?php echo t('vpn_accounts', 'customer'); ?>
                     </small>
                 </div>
                 
-                <button type="submit" class="btn btn-primary btn-block">Add Client</button>
+                <button type="submit" class="btn btn-primary btn-block"><?php echo t('add_client', 'customer'); ?></button>
             </form>
         </div>
     </div>
@@ -420,7 +420,7 @@ $pageTitle = t('my_clients', 'customer') . ' - ' . SITE_NAME;
     <div id="editClientModal" class="modal">
         <div class="modal-content">
             <div class="modal-header">
-                <h2>Edit Client Member</h2>
+                <h2><?php echo t('edit_client_member', 'customer'); ?></h2>
                 <span class="modal-close" onclick="closeModal('editClientModal')">&times;</span>
             </div>
             <form method="POST" action="">
@@ -428,50 +428,50 @@ $pageTitle = t('my_clients', 'customer') . ' - ' . SITE_NAME;
                 <input type="hidden" name="client_id" id="edit_client_id">
                 
                 <div class="form-group">
-                    <label for="edit_client_name">Client Name *</label>
+                    <label for="edit_client_name"><?php echo t('client_name', 'customer'); ?> *</label>
                     <input type="text" name="client_name" id="edit_client_name" required>
                 </div>
                 
                 <div class="form-row">
                     <div class="form-group">
-                        <label for="edit_client_email">Email</label>
+                        <label for="edit_client_email"><?php echo t('email', 'common'); ?></label>
                         <input type="email" name="client_email" id="edit_client_email">
                     </div>
                     <div class="form-group">
-                        <label for="edit_client_phone">Phone</label>
+                        <label for="edit_client_phone"><?php echo t('phone', 'common'); ?></label>
                         <input type="text" name="client_phone" id="edit_client_phone">
                     </div>
                 </div>
                 
                 <div class="form-row">
                     <div class="form-group">
-                        <label for="edit_department">Department</label>
+                        <label for="edit_department"><?php echo t('department', 'customer'); ?></label>
                         <input type="text" name="department" id="edit_department">
                     </div>
                     <div class="form-group">
-                        <label for="edit_status">Status</label>
+                        <label for="edit_status"><?php echo t('status', 'common'); ?></label>
                         <select name="status" id="edit_status">
-                            <option value="active">Active</option>
-                            <option value="suspended">Suspended</option>
-                            <option value="disabled">Disabled</option>
+                            <option value="active"><?php echo t('active', 'common'); ?></option>
+                            <option value="suspended"><?php echo t('suspended', 'common'); ?></option>
+                            <option value="disabled"><?php echo t('disabled', 'common'); ?></option>
                         </select>
                     </div>
                 </div>
                 
                 <div class="form-group">
-                    <label for="edit_notes">Notes</label>
+                    <label for="edit_notes"><?php echo t('notes', 'customer'); ?></label>
                     <textarea name="notes" id="edit_notes" rows="3"></textarea>
                 </div>
                 
                 <div class="form-group">
-                    <label for="edit_max_vpn_accounts">Max VPN Accounts for This Client</label>
-                    <input type="number" name="max_vpn_accounts" id="edit_max_vpn_accounts" min="1" max="100" placeholder="Leave empty for default">
+                    <label for="edit_max_vpn_accounts"><?php echo t('max_vpn_accounts_for_client', 'customer'); ?></label>
+                    <input type="number" name="max_vpn_accounts" id="edit_max_vpn_accounts" min="1" max="100" placeholder="<?php echo t('leave_empty_for_default', 'customer'); ?>">
                     <small style="color: #64748b; margin-top: 5px; display: block;">
-                        Custom limit for this client. Leave empty to use company default: <?php echo $customer['max_vpn_per_client'] ?? 'unlimited'; ?> VPN accounts
+                        <?php echo t('custom_limit_for_client', 'customer'); ?> <?php echo t('leave_empty_for_company_default', 'customer'); ?>: <?php echo $customer['max_vpn_per_client'] ?? t('unlimited', 'common'); ?> <?php echo t('vpn_accounts', 'customer'); ?>
                     </small>
                 </div>
                 
-                <button type="submit" class="btn btn-primary btn-block">Update Client</button>
+                <button type="submit" class="btn btn-primary btn-block"><?php echo t('update_client', 'customer'); ?></button>
             </form>
         </div>
     </div>

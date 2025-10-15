@@ -62,5 +62,9 @@ return [
     'unlimited' => '无限制',
     'name' => '姓名',
     'note' => '注意',
+    'edit' => '编辑',
+    'active' => '活跃',
+    'suspended' => '已暂停',
+    'disabled' => '已禁用',
 ];
 

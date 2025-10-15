@@ -62,5 +62,9 @@ return [
     'unlimited' => 'Unlimited',
     'name' => 'Name',
     'note' => 'Note',
+    'edit' => 'Edit',
+    'active' => 'Active',
+    'suspended' => 'Suspended',
+    'disabled' => 'Disabled',
 ];
 

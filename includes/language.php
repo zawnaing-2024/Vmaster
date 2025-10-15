@@ -6,12 +6,7 @@ if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
 
-// Set default language if not set
-if (!isset($_SESSION['language'])) {
-    $_SESSION['language'] = 'en'; // Default to English
-}
-
-// Handle language switching
+// Handle language switching FIRST (before any output)
 if (isset($_GET['lang']) && in_array($_GET['lang'], ['en', 'zh'])) {
     $_SESSION['language'] = $_GET['lang'];
     
@@ -26,6 +21,11 @@ if (isset($_GET['lang']) && in_array($_GET['lang'], ['en', 'zh'])) {
     }
     header("Location: $redirect_url");
     exit();
+}
+
+// Set default language if not set
+if (!isset($_SESSION['language'])) {
+    $_SESSION['language'] = 'en'; // Default to English
 }
 
 // Get current language
@@ -91,5 +91,3 @@ function getAvailableLanguages() {
         'zh' => '中文'
     ];
 }
-?>
-

@@ -107,5 +107,4 @@ return [
     'download_config' => 'Download Config',
     'scan_qr' => 'Scan QR Code',
 ];
-?>
 

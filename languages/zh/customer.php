@@ -107,5 +107,4 @@ return [
     'download_config' => '下载配置',
     'scan_qr' => '扫描二维码',
 ];
-?>
 

@@ -60,5 +60,4 @@ return [
     'clear' => 'Clear',
     'apply' => 'Apply',
 ];
-?>
 

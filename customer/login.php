@@ -1,6 +1,7 @@
 <?php
-require_once __DIR__ . '/../config/config.php';
+// Include language system FIRST to handle language switching before any output
 require_once __DIR__ . '/../includes/language.php';
+require_once __DIR__ . '/../config/config.php';
 
 // If already logged in, redirect to dashboard
 if (isLoggedIn('customer')) {

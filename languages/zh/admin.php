@@ -119,5 +119,4 @@ return [
     'admin_login' => '管理员登录',
     'login_to_admin' => '登录到管理面板',
 ];
-?>
 

@@ -119,5 +119,4 @@ return [
     'admin_login' => 'Admin Login',
     'login_to_admin' => 'Login to Admin Panel',
 ];
-?>
 

@@ -106,5 +106,15 @@ return [
     'copy_credentials' => '复制凭证',
     'download_config' => '下载配置',
     'scan_qr' => '扫描二维码',
+    
+    // Dashboard
+    'quick_actions' => '快速操作',
+    'manage_clients' => '管理客户',
+    'view_all_accounts' => '查看所有账户',
+    'account_info' => '账户信息',
+    'company_name' => '公司名称',
+    'contact_person' => '联系人',
+    'max_client_accounts' => '最大客户账户数',
+    'account_status' => '账户状态',
 ];
 

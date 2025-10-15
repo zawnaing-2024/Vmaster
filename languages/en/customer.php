@@ -106,5 +106,15 @@ return [
     'copy_credentials' => 'Copy Credentials',
     'download_config' => 'Download Config',
     'scan_qr' => 'Scan QR Code',
+    
+    // Dashboard
+    'quick_actions' => 'Quick Actions',
+    'manage_clients' => 'Manage Clients',
+    'view_all_accounts' => 'View All Accounts',
+    'account_info' => 'Account Information',
+    'company_name' => 'Company Name',
+    'contact_person' => 'Contact Person',
+    'max_client_accounts' => 'Max Client Accounts',
+    'account_status' => 'Account Status',
 ];
 

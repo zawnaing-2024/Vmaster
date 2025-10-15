@@ -237,14 +237,14 @@ $pageTitle = t('vpn_accounts', 'customer') . ' - ' . SITE_NAME;
                                             if (isset($account['plan_duration']) && $account['plan_duration']) {
                                                 echo $account['plan_duration'] . ' month' . ($account['plan_duration'] > 1 ? 's' : '');
                                             } else {
-                                                echo '<span style="color: #10b981;">Unlimited</span>';
+                                                echo '<span style="color: #10b981;">' . t('unlimited', 'vpn') . '</span>';
                                             }
                                             ?>
                                         </td>
                                         <td>
                                             <?php 
                                             if ($account['expiration_status'] === 'unlimited') {
-                                                echo '<span class="badge badge-success">Never</span>';
+                                                echo '<span class="badge badge-success">' . t('never', 'vpn') . '</span>';
                                             } elseif ($account['expiration_status'] === 'expired') {
                                                 echo '<span class="badge badge-danger">' . formatDate($account['expires_at']) . '</span>';
                                             } else {
@@ -263,14 +263,14 @@ $pageTitle = t('vpn_accounts', 'customer') . ' - ' . SITE_NAME;
                                             if ($account['expiration_status'] === 'expired') $badgeClass = 'badge-danger';
                                             ?>
                                             <span class="badge <?php echo $badgeClass; ?>">
-                                                <?php echo $account['expiration_status'] === 'expired' ? 'Expired' : ucfirst($account['status']); ?>
+                                                <?php echo $account['expiration_status'] === 'expired' ? t('expired', 'vpn') : t($account['status'], 'common'); ?>
                                             </span>
                                         </td>
                                         <td><?php echo formatDate($account['created_at']); ?></td>
                                         <td class="action-buttons">
-                                            <button class="btn btn-small btn-success" onclick="viewCredentials(<?php echo $account['id']; ?>)">📋 View</button>
-                                            <button class="btn btn-small btn-info" onclick="shareAccount(<?php echo $account['id']; ?>)">📤 Share</button>
-                                            <a href="?delete=<?php echo $account['id']; ?>" class="btn btn-small btn-danger" onclick="return confirmDelete('Are you sure you want to delete this VPN account?')">Delete</a>
+                                            <button class="btn btn-small btn-success" onclick="viewCredentials(<?php echo $account['id']; ?>)">📋 <?php echo t('view', 'vpn'); ?></button>
+                                            <button class="btn btn-small btn-info" onclick="shareAccount(<?php echo $account['id']; ?>)">📤 <?php echo t('share', 'vpn'); ?></button>
+                                            <a href="?delete=<?php echo $account['id']; ?>" class="btn btn-small btn-danger" onclick="return confirmDelete('Are you sure you want to delete this VPN account?')"><?php echo t('delete', 'common'); ?></a>
                                         </td>
                                     </tr>
                                 <?php endforeach; ?>

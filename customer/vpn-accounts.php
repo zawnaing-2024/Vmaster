@@ -192,9 +192,9 @@ $pageTitle = t('vpn_accounts', 'customer') . ' - ' . SITE_NAME;
                         <span></span>
                         <span></span>
                     </div>
-                    <h1 class="page-title">VPN Accounts</h1>
+                    <h1 class="page-title"><?php echo t('vpn_accounts', 'customer'); ?></h1>
                 </div>
-                <button class="btn btn-primary" onclick="openModal('createVPNModal')">🔑 Create VPN Account</button>
+                <button class="btn btn-primary" onclick="openModal('createVPNModal')">🔑 <?php echo t('create_vpn_account', 'customer'); ?></button>
             </div>
             
             <?php if ($message): ?>
@@ -205,20 +205,20 @@ $pageTitle = t('vpn_accounts', 'customer') . ' - ' . SITE_NAME;
             
             <div class="card">
                 <div class="card-header">
-                    <h2 class="card-title">All VPN Accounts (<?php echo count($vpnAccounts); ?>)</h2>
+                    <h2 class="card-title"><?php echo t('all_vpn_accounts', 'customer'); ?> (<?php echo count($vpnAccounts); ?>)</h2>
                 </div>
                 <div class="table-container">
                     <table>
                         <thead>
                             <tr>
-                                <th>Staff Name</th>
-                                <th>Server</th>
-                                <th>Type</th>
-                                <th>Plan</th>
-                                <th>Expires</th>
-                                <th>Status</th>
-                                <th>Created</th>
-                                <th>Actions</th>
+                                <th><?php echo t('staff_name', 'customer'); ?></th>
+                                <th><?php echo t('server', 'customer'); ?></th>
+                                <th><?php echo t('server_type', 'vpn'); ?></th>
+                                <th><?php echo t('plan', 'vpn'); ?></th>
+                                <th><?php echo t('expires', 'vpn'); ?></th>
+                                <th><?php echo t('status', 'common'); ?></th>
+                                <th><?php echo t('created', 'vpn'); ?></th>
+                                <th><?php echo t('actions', 'common'); ?></th>
                             </tr>
                         </thead>
                         <tbody>
@@ -278,7 +278,7 @@ $pageTitle = t('vpn_accounts', 'customer') . ' - ' . SITE_NAME;
                                 <tr>
                                     <td colspan="8" class="empty-state">
                                         <div class="empty-state-icon">🔑</div>
-                                        <p>No VPN accounts yet. Click "Create VPN Account" to get started.</p>
+                                        <p><?php echo t('no_vpn_accounts', 'vpn'); ?></p>
                                     </td>
                                 </tr>
                             <?php endif; ?>
@@ -293,7 +293,7 @@ $pageTitle = t('vpn_accounts', 'customer') . ' - ' . SITE_NAME;
     <div id="createVPNModal" class="modal">
         <div class="modal-content">
             <div class="modal-header">
-                <h2>Create VPN Account</h2>
+                <h2><?php echo t('create_vpn_account', 'customer'); ?></h2>
                 <span class="modal-close" onclick="closeModal('createVPNModal')">&times;</span>
             </div>
             

@@ -121,5 +121,10 @@ return [
     'client_members' => 'Client Members',
     'department' => 'Department',
     'name' => 'Name',
+    
+    // VPN Accounts Page
+    'all_vpn_accounts' => 'All VPN Accounts',
+    'staff_name' => 'Staff Name',
+    'server' => 'Server',
 ];
 

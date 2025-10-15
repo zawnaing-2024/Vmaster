@@ -121,5 +121,10 @@ return [
     'client_members' => '客户成员',
     'department' => '部门',
     'name' => '姓名',
+    
+    // VPN Accounts Page
+    'all_vpn_accounts' => '所有VPN账户',
+    'staff_name' => '员工姓名',
+    'server' => '服务器',
 ];
 

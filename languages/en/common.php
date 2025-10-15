@@ -61,5 +61,6 @@ return [
     'apply' => 'Apply',
     'unlimited' => 'Unlimited',
     'name' => 'Name',
+    'note' => 'Note',
 ];
 

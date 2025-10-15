@@ -61,5 +61,6 @@ return [
     'apply' => '应用',
     'unlimited' => '无限制',
     'name' => '姓名',
+    'note' => '注意',
 ];
 

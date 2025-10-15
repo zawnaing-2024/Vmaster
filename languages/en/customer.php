@@ -139,5 +139,18 @@ return [
     'avoid_common_words' => 'Avoid common words or patterns',
     'current_password_incorrect' => 'Current password is incorrect.',
     'password_change_failed' => 'Failed to change password. Please try again.',
+    
+    // VPN Account Creation Form
+    'select_client' => 'Select Client',
+    'choose_client' => 'Choose Client',
+    'default_limit' => 'Default',
+    'vpn_accounts_per_client' => 'VPN account(s) per client',
+    'can_be_customized' => 'can be customized per client',
+    'no_default_limit' => 'No default limit',
+    'can_be_set_per_client' => 'can be set per client',
+    'select_vpn_server' => 'Select VPN Server',
+    'choose_server' => 'Choose Server',
+    'need_to_add_clients_first' => 'You need to add clients first before creating VPN accounts.',
+    'go_to_client_management' => 'Go to Client Management',
 ];
 

@@ -299,22 +299,22 @@ $pageTitle = t('vpn_accounts', 'customer') . ' - ' . SITE_NAME;
             
             <?php if (count($clientList) === 0): ?>
                 <div class="alert alert-warning">
-                    You need to add clients first before creating VPN accounts.
+                    <?php echo t('need_to_add_clients_first', 'customer'); ?>
                     <br><br>
-                    <a href="/customer/clients.php" class="btn btn-primary">Go to Client Management</a>
+                    <a href="/customer/clients.php" class="btn btn-primary"><?php echo t('go_to_client_management', 'customer'); ?></a>
                 </div>
             <?php elseif (count($servers) === 0): ?>
                 <div class="alert alert-warning">
-                    No active VPN servers available. Please contact administrator.
+                    <?php echo t('no_active_vpn_servers', 'vpn'); ?>
                 </div>
             <?php else: ?>
                 <form method="POST" action="">
                     <input type="hidden" name="action" value="create">
                     
                     <div class="form-group">
-                        <label for="client_id">Select Client *</label>
+                        <label for="client_id"><?php echo t('select_client', 'customer'); ?> *</label>
                         <select name="client_id" required>
-                            <option value="">-- Choose Client --</option>
+                            <option value="">-- <?php echo t('choose_client', 'customer'); ?> --</option>
                             <?php foreach ($clientList as $client): ?>
                                 <?php 
                                 // Use client's custom limit or customer default
@@ -334,17 +334,17 @@ $pageTitle = t('vpn_accounts', 'customer') . ' - ' . SITE_NAME;
                         </select>
                         <small style="color: #64748b; margin-top: 5px; display: block;">
                             <?php if ($customer['max_vpn_per_client']): ?>
-                                Default: <?php echo $customer['max_vpn_per_client']; ?> VPN account(s) per client (can be customized per client)
+                                <?php echo t('default_limit', 'customer'); ?>: <?php echo $customer['max_vpn_per_client']; ?> <?php echo t('vpn_accounts_per_client', 'customer'); ?> (<?php echo t('can_be_customized', 'customer'); ?>)
                             <?php else: ?>
-                                No default limit (can be set per client)
+                                <?php echo t('no_default_limit', 'customer'); ?> (<?php echo t('can_be_set_per_client', 'customer'); ?>)
                             <?php endif; ?>
                         </small>
                     </div>
                     
                     <div class="form-group">
-                        <label for="server_id">Select VPN Server *</label>
+                        <label for="server_id"><?php echo t('select_vpn_server', 'customer'); ?> *</label>
                         <select name="server_id" required onchange="showServerInfo(this)">
-                            <option value="">-- Choose Server --</option>
+                            <option value="">-- <?php echo t('choose_server', 'customer'); ?> --</option>
                             <?php foreach ($servers as $server): ?>
                                 <option value="<?php echo $server['id']; ?>" 
                                     data-type="<?php echo $server['server_type']; ?>"
@@ -360,31 +360,31 @@ $pageTitle = t('vpn_accounts', 'customer') . ' - ' . SITE_NAME;
                     </div>
                     
                     <div class="form-group">
-                        <label for="plan_duration">Plan Duration</label>
+                        <label for="plan_duration"><?php echo t('plan_duration', 'vpn'); ?></label>
                         <select name="plan_type" id="plan_type" onchange="toggleCustomPlan(this)">
-                            <option value="unlimited">Unlimited (No Expiration)</option>
-                            <option value="preset">Preset Plans</option>
-                            <option value="custom">Custom Date Range</option>
+                            <option value="unlimited"><?php echo t('unlimited_no_expiration', 'vpn'); ?></option>
+                            <option value="preset"><?php echo t('preset_plans', 'vpn'); ?></option>
+                            <option value="custom"><?php echo t('custom_date_range', 'vpn'); ?></option>
                         </select>
                     </div>
                     
                     <!-- Preset Plans -->
                     <div id="presetPlans" style="display: none;">
                         <div class="form-group">
-                            <label for="plan_duration">Select Plan</label>
+                            <label for="plan_duration"><?php echo t('select_plan', 'vpn'); ?></label>
                             <select name="plan_duration" id="plan_duration" onchange="updatePlanInfo(this)">
-                                <option value="">-- Choose Duration --</option>
-                                <option value="1">1 Month Plan</option>
-                                <option value="2">2 Months Plan</option>
-                                <option value="3">3 Months Plan</option>
-                                <option value="6">6 Months Plan</option>
-                                <option value="12">1 Year Plan</option>
+                                <option value="">-- <?php echo t('choose_duration', 'vpn'); ?> --</option>
+                                <option value="1"><?php echo t('1_month_plan', 'vpn'); ?></option>
+                                <option value="2"><?php echo t('2_months_plan', 'vpn'); ?></option>
+                                <option value="3"><?php echo t('3_months_plan', 'vpn'); ?></option>
+                                <option value="6"><?php echo t('6_months_plan', 'vpn'); ?></option>
+                                <option value="12"><?php echo t('1_year_plan', 'vpn'); ?></option>
                             </select>
                             <small style="color: #64748b; margin-top: 5px; display: block;">
-                                Account will expire after the selected duration from creation date
+                                <?php echo t('account_expires_after_duration', 'vpn'); ?>
                             </small>
                             <div id="planInfo" style="display: none; margin-top: 10px; padding: 10px; background: #e0f2fe; border-left: 3px solid #0284c7; border-radius: 4px;">
-                                <strong>📅 Expiration Date:</strong> <span id="expiryDate"></span>
+                                <strong>📅 <?php echo t('expiration_date', 'vpn'); ?>:</strong> <span id="expiryDate"></span>
                             </div>
                         </div>
                     </div>
@@ -392,37 +392,37 @@ $pageTitle = t('vpn_accounts', 'customer') . ' - ' . SITE_NAME;
                     <!-- Custom Date Range -->
                     <div id="customPlan" style="display: none;">
                         <div class="form-group">
-                            <label for="custom_start_date">Start Date</label>
+                            <label for="custom_start_date"><?php echo t('start_date', 'vpn'); ?></label>
                             <input type="date" name="custom_start_date" id="custom_start_date" onchange="updateCustomPlan()">
                             <small style="color: #64748b; margin-top: 5px; display: block;">
-                                Leave empty to start from today
+                                <?php echo t('leave_empty_to_start_today', 'vpn'); ?>
                             </small>
                         </div>
                         <div class="form-group">
-                            <label for="custom_end_date">End Date *</label>
+                            <label for="custom_end_date"><?php echo t('end_date', 'vpn'); ?> *</label>
                             <input type="date" name="custom_end_date" id="custom_end_date" onchange="updateCustomPlan()">
                             <small style="color: #64748b; margin-top: 5px; display: block;">
-                                Choose when the account should expire
+                                <?php echo t('choose_when_account_expires', 'vpn'); ?>
                             </small>
                         </div>
                         <div id="customPlanInfo" style="display: none; margin-top: 10px; padding: 10px; background: #fef3c7; border-left: 3px solid #f59e0b; border-radius: 4px;">
-                            <strong>📅 Duration:</strong> <span id="customDuration"></span><br>
-                            <strong>🗓️ Expires:</strong> <span id="customExpiry"></span>
+                            <strong>📅 <?php echo t('duration', 'vpn'); ?>:</strong> <span id="customDuration"></span><br>
+                            <strong>🗓️ <?php echo t('expires', 'vpn'); ?>:</strong> <span id="customExpiry"></span>
                         </div>
                     </div>
                     
                     <div id="serverInfo" style="display:none; margin-top: 15px; padding: 15px; background: #f8fafc; border-radius: 8px;">
-                        <h4 style="margin-bottom: 10px;">Server Information</h4>
-                        <p><strong>Type:</strong> <span id="infoType"></span></p>
-                        <p><strong>Location:</strong> <span id="infoLocation"></span></p>
-                        <p><strong>Capacity:</strong> <span id="infoCapacity"></span></p>
+                        <h4 style="margin-bottom: 10px;"><?php echo t('server_information', 'vpn'); ?></h4>
+                        <p><strong><?php echo t('type', 'vpn'); ?>:</strong> <span id="infoType"></span></p>
+                        <p><strong><?php echo t('location', 'vpn'); ?>:</strong> <span id="infoLocation"></span></p>
+                        <p><strong><?php echo t('capacity', 'vpn'); ?>:</strong> <span id="infoCapacity"></span></p>
                     </div>
                     
                     <div class="alert alert-info" style="margin-top: 20px;">
-                        <strong>Note:</strong> VPN credentials will be automatically generated based on the server type selected.
+                        <strong><?php echo t('note', 'common'); ?>:</strong> <?php echo t('vpn_credentials_auto_generated', 'vpn'); ?>
                     </div>
                     
-                    <button type="submit" class="btn btn-primary btn-block">Create VPN Account</button>
+                    <button type="submit" class="btn btn-primary btn-block"><?php echo t('create_vpn_account', 'customer'); ?></button>
                 </form>
             <?php endif; ?>
         </div>
@@ -432,7 +432,7 @@ $pageTitle = t('vpn_accounts', 'customer') . ' - ' . SITE_NAME;
     <div id="viewCredentialsModal" class="modal">
         <div class="modal-content">
             <div class="modal-header">
-                <h2>VPN Account Credentials</h2>
+                <h2><?php echo t('vpn_account_credentials', 'vpn'); ?></h2>
                 <span class="modal-close" onclick="closeModal('viewCredentialsModal')">&times;</span>
             </div>
             <div id="credentialsContent">

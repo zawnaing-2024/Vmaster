@@ -139,5 +139,18 @@ return [
     'avoid_common_words' => '避免使用常见词汇或模式',
     'current_password_incorrect' => '当前密码不正确。',
     'password_change_failed' => '修改密码失败，请重试。',
+    
+    // VPN Account Creation Form
+    'select_client' => '选择客户端',
+    'choose_client' => '选择客户端',
+    'default_limit' => '默认',
+    'vpn_accounts_per_client' => '个VPN账户/客户端',
+    'can_be_customized' => '可为每个客户端自定义',
+    'no_default_limit' => '无默认限制',
+    'can_be_set_per_client' => '可为每个客户端设置',
+    'select_vpn_server' => '选择VPN服务器',
+    'choose_server' => '选择服务器',
+    'need_to_add_clients_first' => '在创建VPN账户之前，您需要先添加客户端。',
+    'go_to_client_management' => '前往客户端管理',
 ];
 
